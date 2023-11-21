@@ -16,7 +16,6 @@ todo_ref = db.collection('todos')
 def index():
     return render_template('index.html')
 
-
 @app.route('/table')
 def show_table():
     # Retrieve data from Firestore (replace 'your_collection_name' with the actual collection name)
@@ -62,11 +61,6 @@ def read():
 
 @app.route('/update', methods=['POST', 'PUT'])
 def update():
-    """
-        update() : Update document in Firestore collection with request body.
-        Ensure you pass a custom ID as part of json body in post request,
-        e.g. json={'id': '1', 'title': 'Write a blog post today'}
-    """
     try:
         id = request.json['id']
         todo_ref.document(id).update(request.json)
@@ -76,9 +70,6 @@ def update():
 
 @app.route('/delete', methods=['GET', 'DELETE'])
 def delete():
-    """
-        delete() : Delete a document from Firestore collection.
-    """
     try:
         # Check for ID in URL query
         todo_id = request.args.get('id')
