@@ -160,6 +160,9 @@ cython_debug/
 #.idea/
 
 api_env/
+
+key.json
+
 api-env/lib64
 api-env/pyvenv.cfg
 api-env/bin/activate
