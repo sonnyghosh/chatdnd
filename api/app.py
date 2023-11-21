@@ -1,17 +1,22 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect, render_template, url_for
 from firebase_admin import credentials, firestore, initialize_app
 import firebase_admin
 print(firebase_admin.__version__)
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 # Initialize Firestore DB
 cred = credentials.Certificate('key.json')
 default_app = initialize_app(cred)
 db = firestore.client()
 todo_ref = db.collection('todos')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 
 @app.route('/add', methods=['POST'])
 def create():
@@ -75,4 +80,4 @@ def delete():
 
 port = int(os.environ.get('PORT', 8080))
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=port)
+    app.run(threaded=True, host='0.0.0.0', port=port, debug=True)
