@@ -17,3 +17,7 @@ Welcome to chatDND, a text-based adventure game where you embark on an epic jour
 1. Clone this repository:
 
    ```bash git clone https://github.com/your-username/chatDND.git```
+
+
+If you have problems or suggestions please direct them to the cretive director
+- stef
