@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: dnd-api
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    image: dnd-client
+    ports:
+      - "3000:80" 
