@@ -1,9 +1,11 @@
 FROM python:3.9
 WORKDIR /app
 
-COPY /api/requirements.txt api/api.py api/.flaskenv ./
-RUN pip install -r ./requirements.txt
+COPY api/. ./api/
+RUN pip install -r ./api/requirements.txt
 EXPOSE 5000
+
+WORKDIR /app/api
 CMD ["python3", "-m", "flask", "run", "--host=0.0.0.0"]
 
 
