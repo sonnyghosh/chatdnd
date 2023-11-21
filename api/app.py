@@ -12,24 +12,34 @@ default_app = initialize_app(cred)
 db = firestore.client()
 todo_ref = db.collection('todos')
 
-@app.route('/')
+@app.route('/', methods=['POST', 'GET'])
 def index():
     return render_template('index.html')
 
 
-@app.route('/add', methods=['POST'])
-def create():
-    """
-        create() : Add document to Firestore collection with request body.
-        Ensure you pass a custom ID as part of json body in post request,
-        e.g. json={'id': '1', 'title': 'Write a blog post'}
-    """
-    try:
-        id = request.json['id']
-        todo_ref.document(id).set(request.json)
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        return f"An Error Occurred: {e}"
+@app.route('/table')
+def show_table():
+    # Retrieve data from Firestore (replace 'your_collection_name' with the actual collection name)
+    table_data = todo_ref.get()
+    return render_template('table.html', table_data=table_data)
+
+@app.route('/add', methods=['GET', 'POST'])
+def add_data():
+    if request.method == 'POST':
+        try:
+            id = request.form['id']
+            title = request.form['title']
+            todo_ref.document(id).set({'id': id, 'title': title})
+            return redirect('/table')
+        except Exception as e:
+            return f"An Error Occurred: {e}"
+    return render_template('add.html')
+
+@app.route('/remove/<string:id>')
+def remove_data(id):
+    # Remove data from Firestore
+    todo_ref.document(id).delete()
+    return redirect('/table')
 
 @app.route('/list', methods=['GET'])
 def read():

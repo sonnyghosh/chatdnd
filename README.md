@@ -12,6 +12,8 @@ Welcome to chatDND, a text-based adventure game where you embark on an epic jour
 
     ```pip install -r requirements.txt```
 
+Make sure you have Python installed on your system. If not, download and install it from [Python's official website](https://www.python.org/downloads/).
+
 ### Installation
 
 1. Clone this repository:

@@ -1,40 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Your Website</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+{% extends 'base.html' %}
 
-        .container {
-            text-align: center;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        p {
-            color: #666;
-        }
-    </style>
-</head>
-<body>
-
+{% block content %}
 <div class="container">
     <h1>Welcome to Your Website</h1>
     <p>Thank you for visiting. We're excited to share our journey with you.</p>
 </div>
-
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Data Table</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Action</th>
+        </tr>
+        {% for data in table_data %}
+            <tr>
+                <td>{{ data.id }}</td>
+                <td>{{ data.title }}</td>
+                <td><a href="/remove/{{ data.id }}">Remove</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="/add">Add New Data</a>
+{% endblock %}
