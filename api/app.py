@@ -1,6 +1,8 @@
 import os
 from flask import Flask, request, jsonify
 from firebase_admin import credentials, firestore, initialize_app
+import firebase_admin
+print(firebase_admin.__version__)
 
 # Initialize Flask app
 app = Flask(__name__)
