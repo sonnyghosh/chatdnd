@@ -20,4 +20,4 @@ Welcome to chatDND, a text-based adventure game where you embark on an epic jour
 
 
 If you have problems or suggestions please direct them to the cretive director
-- stef
+- stefGPT
