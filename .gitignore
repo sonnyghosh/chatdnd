@@ -179,5 +179,6 @@ api-env/bin/python
 api-env/bin/python3
 api-env/bin/python3.10
 
+api/.env
 # firebase
 key.json
