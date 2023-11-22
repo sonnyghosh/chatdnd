@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import { BrowserRouter, Link, Switch, Route} from "react-router-dom";
+import { BrowserRouter, Link, Routes, Route} from "react-router-dom";
 import './App.css';
 
 function App() {
@@ -21,7 +21,7 @@ function App() {
                         <Link className="App-link" to="/page2">Page2</Link>
                     </div>
                 </BrowserRouter>
-                <Switch>
+                <Routes>
                     <Route exact path ="/">
                         <p>
                             Edit <code>src/App.js</code> and save to reload.
@@ -39,7 +39,7 @@ function App() {
                     <Route path="/page2">
                         This is page 2!
                     </Route>
-                </Switch>
+                </Routes>
             </header>
         </div>
     );

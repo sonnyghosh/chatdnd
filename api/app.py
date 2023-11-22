@@ -14,9 +14,9 @@ app = Flask(__name__, template_folder='templates')
 # db = firestore.client()
 # todo_ref = db.collection('todos')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# @app.route('/')
+# def index():
+#     return render_template('index.html')
 
 @app.route("/time")
 def time():
@@ -84,5 +84,5 @@ def time():
 #         return f"An Error Occurred: {e}"
 
 # port = int(os.environ.get('PORT', 8080))
-# if __name__ == '__main__':
-#     app.run(threaded=True, host='0.0.0.0', port=port, debug=True)
+if __name__ == '__main__':
+    app.run(threaded=True, host='0.0.0.0', port=5000, debug=True)
