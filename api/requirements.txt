@@ -15,3 +15,4 @@ Werkzeug==3.0.1
 yarg==0.1.9
 firebase-admin==6.2.0
 gunicorn==21.2.0
+flask_cors

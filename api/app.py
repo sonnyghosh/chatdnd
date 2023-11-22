@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, jsonify, redirect, render_template, url_for
+from flask_cors import CORS
 from datetime import datetime
 # from firebase_admin import credentials, firestore, initialize_app
 # import firebase_admin
@@ -7,7 +8,7 @@ from datetime import datetime
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates')
-
+CORS(app)
 # Initialize Firestore DB
 # cred = credentials.Certificate('key.json')
 # default_app = initialize_app(cred)
@@ -18,7 +19,7 @@ app = Flask(__name__, template_folder='templates')
 # def index():
 #     return render_template('index.html')
 
-@app.route("/time")
+@app.route("/api/time")
 def time():
     now = datetime.now()
     return {"time" : now}
