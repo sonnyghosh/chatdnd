@@ -24,5 +24,7 @@ Welcome to chatDND, a text-based adventure game where you embark on an epic jour
 - To quit:
     ```docker-compose down```
 - If you haven't done so, build the api and client images like this:
+  
     ```docker build -f Dockerfile.client -t dnd-client .```
+  
     ```docker build -f Dockerfile.api -t dnd-api .```
