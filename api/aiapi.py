@@ -6,16 +6,24 @@ load_dotenv()
 token = os.environ.get("OPENAI_API_KEY")
 client = OpenAI(api_key=token)
 
-def generateStoryResponse(prompt, context, max_len=450):
+sys_pt = '''
+You are the dungeon master of the wonderful game of chatDND. 
+You provide completions to the storyline with user options to pick what to do next. 
+Format of response:
+Story{continuation of story}
+Variables{variable:value change}
+'''
+
+def generateStoryResponse(prompt, context='', max_len=250):
     messages = []
-    messages.append({"role": "system", "content": "You are the dungeon master of the wonderful game of chatDND. You provide completions to the storyline with user options to pick what to do next. The storyline should be interesting and challenging."})
+    messages.append({"role": "system", "content": sys_pt})
     messages.append({"role": "system", "content": context})
     question = {}
     question['role'] = 'user'
     question['content'] = prompt
     messages.append(question)
     
-    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=messages, max_tokens=mex_len)
+    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=messages, max_tokens=max_len)
     try:
         answer = response.choices[0].message.content.replace('\n','<br>') # return as html
     except Exception as e:

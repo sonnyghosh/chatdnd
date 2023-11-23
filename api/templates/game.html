@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>What happens next?</h1>
+    
+    <form method="post" action="/game">
+        <label for="user_input">Enter input:</label>
+        <input type="text" id="user_input" name="user_input" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if result %}
+        <p>Result: {{ result }}</p>
+    {% endif %}
+{% endblock %}
