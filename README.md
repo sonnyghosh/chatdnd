@@ -35,5 +35,14 @@ Make sure you have Python installed on your system. If not, download and install
 
     ```sudo docker-compose logs```
 
+- To run API:
+
+    ```sudo docker run -d -p 5000:5000 dnd-api```
+
+- Stop API:
+
+    ```docker ps```
+    ```docker stop [CONTAINER ID]```
+
 If you have problems or suggestions please direct them to the cretive director
 - stefGPT
