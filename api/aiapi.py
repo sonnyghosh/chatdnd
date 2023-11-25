@@ -10,8 +10,12 @@ sys_pt = '''
 You are the dungeon master of the wonderful game of chatDND. 
 You provide completions to the storyline with user options to pick what to do next. 
 Format of response:
-Story{continuation of story}
-Variables{variable:value change}
+Story{
+    continuation of story
+}
+Variables{
+    variable:value change
+}
 '''
 
 def generateStoryResponse(prompt, context='', max_len=250):
@@ -31,6 +35,7 @@ def generateStoryResponse(prompt, context='', max_len=250):
         answer = 'cannot get response from API'
 
     return answer
+
 
 '''
 Example of a chat completion object
