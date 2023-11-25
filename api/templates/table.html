@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Data Table</h1>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in table_data %}
+                    <tr>
+                        <td>{{ data.id }}</td>
+                        <td>{{ data.title }}</td>
+                        <td><a href="/remove/{{ data.id }}" class="btn btn-danger btn-sm">Remove</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/add" class="btn btn-primary">Add New Data</a>
+    </div>
+{% endblock %}
