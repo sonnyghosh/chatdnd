@@ -22,15 +22,20 @@ Make sure you have Python installed on your system. If not, download and install
 
 
 ## Testing/Development
-- To easily test the website, run the following:
-    ```sudo docker-compose up```
-- To quit:
-    ```sudo docker-compose down```
 - Before running ```docker-compose up``` build the api and client images:
   
     ```sudo docker build -f Dockerfile.client -t dnd-client .```
   
     ```sudo docker build -f Dockerfile.api -t dnd-api .```
+
+- To easily test the website, run the following:
+
+    ```sudo docker-compose up```
+
+- To quit:
+
+    ```sudo docker-compose down```
+
 - To view logs:
 
     ```sudo docker-compose logs```
@@ -46,7 +51,7 @@ Make sure you have Python installed on your system. If not, download and install
 - Stop API:
 
     ```docker ps```
-    
+
     then
 
     ```docker stop [CONTAINER ID]```
