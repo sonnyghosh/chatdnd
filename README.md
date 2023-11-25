@@ -31,6 +31,9 @@ Make sure you have Python installed on your system. If not, download and install
     ```docker build -f Dockerfile.client -t dnd-client .```
   
     ```docker build -f Dockerfile.api -t dnd-api .```
+- To view logs:
+
+    ```docker-compose logs```
 
 If you have problems or suggestions please direct them to the cretive director
 - stefGPT
