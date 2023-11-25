@@ -38,10 +38,13 @@ Make sure you have Python installed on your system. If not, download and install
 - To run API:
 
     ```sudo docker run -d -p 5000:5000 dnd-api```
+    or
+    ```sudo docker run -p 5000:5000 dnd-api``` (console output)
 
 - Stop API:
 
     ```docker ps```
+    then
     ```docker stop [CONTAINER ID]```
 
 If you have problems or suggestions please direct them to the cretive director
