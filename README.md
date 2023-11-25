@@ -23,17 +23,17 @@ Make sure you have Python installed on your system. If not, download and install
 
 ## Testing/Development
 - To easily test the website, run the following:
-    ```docker-compose up```
+    ```sudo docker-compose up```
 - To quit:
-    ```docker-compose down```
+    ```sudo docker-compose down```
 - Before running ```docker-compose up``` build the api and client images:
   
-    ```docker build -f Dockerfile.client -t dnd-client .```
+    ```sudo docker build -f Dockerfile.client -t dnd-client .```
   
-    ```docker build -f Dockerfile.api -t dnd-api .```
+    ```sudo docker build -f Dockerfile.api -t dnd-api .```
 - To view logs:
 
-    ```docker-compose logs```
+    ```sudo docker-compose logs```
 
 If you have problems or suggestions please direct them to the cretive director
 - stefGPT
