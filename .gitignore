@@ -161,24 +161,13 @@ cython_debug/
 
 api_env/
 
-key.json
-
-api-env/lib64
-api-env/pyvenv.cfg
-api-env/bin/activate
-api-env/bin/activate.csh
-api-env/bin/activate.fish
-api-env/bin/Activate.ps1
-api-env/bin/flask
-api-env/bin/normalizer
-api-env/bin/pip
-api-env/bin/pip3
-api-env/bin/pip3.10
-api-env/bin/pipreqs
-api-env/bin/python
-api-env/bin/python3
-api-env/bin/python3.10
-
-api/.env
 # firebase
 key.json
+
+api/api-env
+
+
+node_modules
+
+package-lock.json
+api/.env

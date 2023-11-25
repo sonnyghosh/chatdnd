@@ -1,12 +1,14 @@
 import os
 from flask import Flask, request, jsonify, redirect, render_template, url_for
+from flask_cors import CORS
+from datetime import datetime
 from firebase_admin import credentials, firestore, initialize_app
 import firebase_admin
 from aiapi import generateStoryResponse
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates')
-
+CORS(app)
 # Initialize Firestore DB
 cred = credentials.Certificate('key.json')
 default_app = initialize_app(cred)
@@ -17,11 +19,18 @@ todo_ref = db.collection('todos')
 def index():
     return render_template('index.html')
 
+
+@app.route("/api/time")
+def time():
+    now = datetime.now()
+    return {"time" : now}
+
 @app.route('/table')
 def show_table():
     # Retrieve data from Firestore (replace 'your_collection_name' with the actual collection name)
     table_data = todo_ref.get()
     return render_template('table.html', table_data=table_data)
+
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_data():
@@ -79,6 +88,7 @@ def delete():
     except Exception as e:
         return f"An Error Occurred: {e}"
 
+
 @app.route('/game', methods=['GET', 'POST'])
 def game():
     if request.method == 'GET':
@@ -97,7 +107,5 @@ def game():
     else:
         return "Method not allowed"
     
-
-port = int(os.environ.get('PORT', 8080))
 if __name__ == '__main__':
-    app.run(threaded=True, host='0.0.0.0', port=port, debug=True)
+    app.run(threaded=True, host='0.0.0.0', port=5000, debug=True)
