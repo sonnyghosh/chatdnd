@@ -5,6 +5,9 @@ COPY package.json ./
 RUN npm install
 COPY ./src ./src
 COPY ./public ./public
+COPY craco.config.js ./
+COPY tailwind.config.js ./
+COPY tailwind.config.scss ./
 CMD ["npm", "start"]
 
 

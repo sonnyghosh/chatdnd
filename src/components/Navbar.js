@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from "react";
-import { findRenderedComponentWithType } from "react-dom/test-utils";
+// import './output.css';
 
-function Navbar() {
+export const Navbar = () => {
    return (
-    <div className="flex flex-row flex-auto border-b-2 border-red-400">
+    <div className="flex flex-row flex-auto border-b-2 border-red-400 text-sm h-4 bg-black">
         <InformationContainer />
         <DieRollContainer />
         <AttributesContainer />
@@ -33,7 +33,7 @@ function AttributesContainer() {
                 <p>ATK : {INT}</p> 
                 <p>WIS : {WIS}</p>
             </div>
-            <div className="border-l-2 border-b2 border-red-400 flex flex-row flex-auto">
+            <div className="border-l-2 border-b-2 border-red-400 flex flex-row flex-auto">
                 <p>Level : { level }</p>
                 <p>HP : { HP }</p>
                 <p>MP : { MP }</p>
@@ -51,7 +51,7 @@ function InformationContainer() {
     }
     const { name, weapon, playerClass } = characterInfo;
     return (
-        <div className="flex flex-col flex-auto border-l-2 border-b-2 border-red-400">
+        <div className="flex flex-col flex-auto border-l-2 border-b-2 border-red-400 w-1/3">
             <p>Name : {name} </p>
             <p>Weapon : {weapon}</p>
             <p>Class : {playerClass} </p>
@@ -65,11 +65,13 @@ function DieRollContainer() {
         rollNeeded : 30,
         modifiers : 4
     }
+    const {currentRoll, rollNeeded, modifiers } = dieRoll;
 
     return (
-        <>
-        </>
+        <div className="flex flex-col flex-auto border-l-2 border-b-2 border-red-400 w-1/6">
+            <p>Current Roll : { currentRoll }</p>
+            <p>Roll Needed : { rollNeeded }</p>
+            <p>Modifier : { modifiers }</p>
+        </div>        
     )
 }
-
-export {Navbar} from "Navbar";
