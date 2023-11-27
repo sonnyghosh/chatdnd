@@ -166,8 +166,9 @@ key.json
 
 api/api-env
 
-
 node_modules
 
 package-lock.json
 api/.env
+
+.vscode
