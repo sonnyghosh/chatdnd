@@ -4,6 +4,7 @@ import React, {useState, useEffect} from "react";
 export const Navbar = () => {
    return (
     <div className="flex flex-row flex-auto border-b-2 border-red-400 text-sm bg-black text-white h-fit font-custom">
+        {/* <SpriteContainer /> */}
         <InformationContainer />
         <DieRollContainer />
         <AttributesContainer />
@@ -25,7 +26,7 @@ function AttributesContainer() {
    }
    const {ATK, DEF, CHA, INT, WIS, level, HP, MP, STA} = characterAttributes;
     return (
-        <div className="flex flex-col w-1/2">
+        <div className="flex flex-col w-1/3">
             <div className="border-l-2 border-b-2 border-red-400 flex flex-row flex-auto justify-around">
                 <p className="mt-1">ATK: {ATK}</p>
                 <p className="mt-1">DEF: {DEF}</p>
@@ -75,3 +76,16 @@ function DieRollContainer() {
         </div>        
     )
 }
+
+// function SpriteContainer() {
+//     const SpriteResponse = {
+//         sprite_url : "main_character.png"
+//     }
+//     const { sprite_url } = SpriteResponse;
+
+//     return (
+//         <div className="w-1/6">
+//             <img src={ sprite_url }/>
+//         </div>
+//     )
+// }
