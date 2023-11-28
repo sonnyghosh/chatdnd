@@ -172,3 +172,5 @@ package-lock.json
 api/.env
 
 .vscode
+
+yarn.lock

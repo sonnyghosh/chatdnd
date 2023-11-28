@@ -1,7 +1,0 @@
-function HomePage() {
-    return (
-        <>
-            
-        </>
-    )
-}
