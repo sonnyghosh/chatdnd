@@ -65,9 +65,9 @@ def generate_party(n_members, squad_name):
         members.append(pl)
     return party.Party(members, name=squad_name)
 
-player_party = generate_party(1, 'Dike Tyson\'s Squad')
+player_party = generate_party(3, 'Dike Tyson\'s Squad')
 print(player_party)
-enemy_party = generate_party(1, 'Enemy Squad')
+enemy_party = generate_party(3, 'Enemy Squad')
 print(enemy_party)
 current_battle = battle.Battle(player_party, enemy_party)
 current_battle.start()

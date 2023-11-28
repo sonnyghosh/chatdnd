@@ -27,16 +27,19 @@ class Battle:
             if action == "attack":
                 prompt = 'Who would you like to attack? Enter the number of the character...\n'
                 targets = self.enemy_party.get_party_members_names()
-                target_idx = int(input(prompt + targets))
+                target_idx = int(input(prompt + targets + str(player)))
                 target = cur_enemy_party[target_idx]
                 player.attack(target)
                 
             elif action.startswith("use"):
                 item = player.items[int(action.split()[1])]
-                prompt = 'Who would you like to use it on? [S]elf, [F]riend, [E]nemy: '
-                target_idx = str.upper(input(prompt).split()[0])
-                while target_idx not in ['S','F','E']:
+                if item.cat != 2:
+                    prompt = 'Who would you like to use it on? [S]elf, [F]riend, [E]nemy: '
                     target_idx = str.upper(input(prompt).split()[0])
+                    while target_idx not in ['S','F','E']:
+                        target_idx = str.upper(input(prompt).split()[0])
+                else:
+                    target_idx = 'E'
                 clr_t()
                 if target_idx == 'S':
                     player.use(item)
@@ -74,9 +77,32 @@ class Battle:
                     print('that was not a valid action')
         clr_t()
         # Enemy turn   
-        for enemy in self.enemy_party.get_alive_players():
-            target = random.choice(self.player_party.get_alive_players())
-            enemy.attack(target)
+        cur_enemy_party = self.enemy_party.get_alive_players()
+        for enemy in cur_enemy_party:
+            cur_player_party = self.player_party.get_alive_players()
+            target = random.choice(cur_player_party)
+
+            if random.random() > 0.6:
+                enemy.attack(target)
+            # TODO: Make intelligent method of selecting moves
+            else:
+                item = random.choice(enemy.items)
+                if item.cat == 0:
+                    if random.random() > 0.5:
+                        enemy.use(item)
+                    else:
+                        enemy.use(item, random.choice(cur_enemy_party))
+                
+                elif item.cat == 1:
+                    if 'ATK' in item.effects.keys():
+                        enemy.use(item, target)
+                    else:
+                        if random.random() > 0.5:
+                            enemy.use(item)
+                        else:
+                            enemy.use(item, random.choice(cur_enemy_party))
+                else:
+                    enemy.use(item, target)
         
 
     def start(self):

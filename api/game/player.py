@@ -49,18 +49,17 @@ class Player:
         # print all of the player stats
         res += '\tStats:'
         for st, val in self.stats.items():
-            res += f'\n\t\t{st} - {val}'
-
+            res += f'| {st} - {val} '
+        res += '|'
         # print out the attributes of th player
         res += '\n\tAttributes:'
         for st, val in self.attr.items():
-            res += f'\n\t\t{st} - {val}'
-
+            res += f'| {st} - {val} '
+        res += '|'
         #print out player items
         res += '\n\tItems:'
         for idx, it in enumerate(self.items):
             res += f'\n\t\t{idx}: {it}'
-
         res += '\n\t-------------------------'
         return res
 
@@ -167,3 +166,6 @@ class Player:
             self.use_magic(effects, target)
         elif item.cat == 2:
             self.use_attack(effects, target)
+
+    def get_stats(self, item_index):
+        pass

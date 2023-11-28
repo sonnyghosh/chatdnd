@@ -28,7 +28,7 @@ class Item:
         self.effects = effects
 
     def __str__(self) -> str:
-        return f'{self.name} - Type: {self.cat} Uses: {self.uses}, Effects: {self.effects}'
+        return f'{self.name} - Type: {self.cat} Uses: {self.uses}, Effects | {"".join([f"{key}: {val} " for key, val in self.effects.items()])}|'
 
     def validate_effects(self, effects):
         """
