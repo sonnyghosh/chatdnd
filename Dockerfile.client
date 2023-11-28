@@ -1,13 +1,13 @@
 FROM node as build-setup
 WORKDIR /app
 ENV PATH ./node_modules/.bin:$PATH
-COPY package.json ./
+COPY /dnd-client/package.json ./
 RUN npm install
-COPY ./src ./src
-COPY ./public ./public
-COPY craco.config.js ./
-COPY tailwind.config.js ./
-COPY tailwind.config.scss ./
+COPY ./dnd-client/src ./src
+COPY ./dnd-client/public ./public
+COPY ./dnd-client/tailwind.config.js ./
+COPY ./dnd-client/postcss.config.js ./
+COPY ./dnd-client/vite.config.js ./
 CMD ["npm", "start"]
 
 
