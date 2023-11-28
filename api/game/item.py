@@ -4,6 +4,7 @@ class Item:
 
     Attributes:
     - name (str): The name of the item.
+    - cat (int): The type of item 0-2.
     - uses (int): The number of uses the item has.
     - effects (dict): A dictionary representing the effects of the item on game stats.
 
@@ -17,6 +18,7 @@ class Item:
 
         Parameters:
         - name (str): The name of the item.
+        - cat (int): The type of item 0-2.
         - uses (int): The initial number of uses the item has.
         - effects (dict): A dictionary representing the effects of the item on game stats.
         """
@@ -66,16 +68,9 @@ class Item:
         - dict: The effects of the item on game stats.
         """
         if self.uses > 0:
-            # Apply the effects
-            # For simplicity, let's assume effects is a dictionary with stat names as keys and values as changes
-            # Apply these changes to the game stats
-            # For example, if effects = {'health': 10, 'attack': 5}, it means the item increases health by 10 and attack by 5
-            # Adjust this part based on the actual structure of your game stats
-            # game_stats.apply_effects(self.effects)
-
-            # Decrement uses
             self.uses -= 1
-
+            return self.effects
+        elif self.uses == -1:
             return self.effects
         else:
             # If uses are already 0, the item is broken

@@ -3,17 +3,17 @@ import sys
 sys.path.append('./api/game')
 from game import battle, item, player, party
 
-stats = ['ATK', 'DEF', 'CHA', 'INT', 'WIS', 'HP', 'STA','LVL']
+stats = ['ATK', 'DEF', 'CHA', 'INT', 'WIS', 'HP', 'MP', 'STA','LVL']
 item_names = ['potion', 'magic', 'weapon']
 choices = {
     'potion': stats[:-1],
-    'magic': stats[:-3],
+    'magic': stats[:-4],
     'weapon': stats[0],
 }
 
-def generate_items():
+def generate_items(n_items):
     bag = []
-    for _ in range(3):
+    for _ in range(n_items):
         ind = random.randint(0,2)
         if ind == 0:
             bag.append(item.Item(item_names[ind],
@@ -34,7 +34,6 @@ def generate_items():
                                   'STA': random.randint(-15,-1)}))
     return bag
 
-
 def generate_player(name):
     stats = {
         'ATK': random.randint(1,51),
@@ -47,14 +46,14 @@ def generate_player(name):
     attr = {
         'LVL': random.randint(1,101),
         'HP': 100,
+        'MP': 100,
         'STA': 100,
         'name': name,
     }
 
-    items = generate_items()
+    items = generate_items(random.randint(3,7))
 
     return player.Player(stats=stats, attr=attr, items=items)
-
 
 names = ["Blaze", "Rebel", "Ace", "Rogue", "Phoenix", "Echo", "Zenith", "Valor", "Cipher", "Nova", "Trinity", "Neo", "Onyx", "Astra", "Azure", "Bex", "Briar", "Cove", "Halo", "Ivory", "Jupiter", "Kai", "Lev", "Nyx", "Reign", "Rune", "Wren", "Zephyr"]
 
