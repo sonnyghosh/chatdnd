@@ -3,7 +3,7 @@ import React, {useState, useEffect} from "react";
 
 export const Navbar = () => {
    return (
-    <div className="flex flex-row flex-auto border-b-2 border-red-400 text-sm bg-black text-white h-fit font-custom">
+    <div className="flex flex-row flex-auto border-b-2 border-red-400 text-sm bg-slate-800 text-white h-fit font-custom">
         {/* <SpriteContainer /> */}
         <InformationContainer />
         <DieRollContainer />
