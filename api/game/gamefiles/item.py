@@ -42,7 +42,7 @@ class Item:
         return new_rank
 
     def __str__(self) -> str:
-        return f'{self.name} - Rank: {self.rank} Uses: {self.uses if self.uses != -99 else self.inf_char}, Effects [ {"".join([f"{key}: {val} " for key, val in self.effects.items()])}]'
+        return f'{self.type.name} - Rank: {self.rank}, Uses: {self.uses if self.uses != -99 else self.inf_char}, Effects [ {"".join([f"{key.value}: {val} " for key, val in self.effects.items()])}]'
 
     def validate_effects(self):
         """
@@ -70,7 +70,7 @@ class Item:
         # Check if all keys have valid values
         for key, value in self.effects.items():
             if key in valid_ranges and value not in valid_ranges[key]:
-                print(f"Invalid {key} value {value} for {self.name}. Valid range: {valid_ranges[key]}.")
+                print(f"Invalid {key} value {value} for {self.type}. Valid range: {valid_ranges[key]}.")
                 return False
 
         return True
@@ -87,6 +87,8 @@ class Item:
             return self.effects
         elif self.uses == -99:
             return self.effects
+        else:
+            return {}
 
 def generate_items(n_items, level):
     bag = {
@@ -122,7 +124,7 @@ def generate_items(n_items, level):
             item_uses = random.randint(int(level/5),int(level/4))
             effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/3))))
             side_effect = int(-effect_bonus * (random.random()*0.5+0.5))
-            item_effects = {g_vars.choices[item_name]: effect_bonus,PlayerStat.stamina: side_effect}
+            item_effects = {PlayerStat.attack: effect_bonus,PlayerStat.stamina: side_effect}
         
         # generate armor
         elif ind == 3:
@@ -130,7 +132,7 @@ def generate_items(n_items, level):
             item_uses = 100
             effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/5))))
             side_effect = int(-effect_bonus * (random.random()*0.2) -1)
-            item_effects = {g_vars.choices[item_name]: effect_bonus,PlayerStat.stamina: side_effect}
+            item_effects = {PlayerStat.defense: effect_bonus, PlayerStat.stamina: side_effect}
 
         bag[g_vars.ItemType(ind)].append(item.Item(item_name, item_uses, item_effects))
     return bag

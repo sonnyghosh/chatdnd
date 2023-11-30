@@ -98,7 +98,7 @@ class Player:
         return res
 
     def get_item_type(self, itemtype):
-        return [w for w in self.items[itemtype] if w.uses != 0]
+        return [w for w in self.items[itemtype] if ( w.uses != 0 and abs(w.effects.get(PlayerStat.stamina, 0)) <= self.attr[PlayerStat.stamina] and abs(w.effects.get(PlayerStat.mana, 0)) <= self.attr[PlayerStat.mana] )]
 
     def __str__(self) -> str:
         # print out the name of the player
@@ -129,10 +129,10 @@ class Player:
             max_roll += 0.08 * stat
         return random.randint(int(min_roll), int(max_roll))
 
-    def attack(self, target):
-        return self.use_attack({PlayerStat.attack:0, PlayerStat.stamina: -random.randint(1,4)}, target)
+    def attack(self, target: 'Player', use_armor=True):
+        return self.use_attack({PlayerStat.attack:0, PlayerStat.stamina: -random.randint(1,4)}, target, use_armor=use_armor)
 
-    def use_attack(self, effects, target):
+    def use_attack(self, effects, target: 'Player', use_armor=True):
          # use item to get effects
         if effects:
             # get roles for players
@@ -147,6 +147,14 @@ class Player:
             if 15 < attacker_role:
                 damage *= 2
                 print("Critical hit!")
+
+            if use_armor:
+                armor = target.get_item_type(ItemType.armor)
+                if len(armor) > 0:
+                    armor = armor[0]
+                    block = armor.use()
+                    damage -= block[PlayerStat.defense]
+                    target.attr[PlayerStat.stamina] += block[PlayerStat.stamina]
 
             damage -= int(target.stats[PlayerStat.defense]*(target.attr[PlayerStat.level]/100)) # Reduce damage based on target's defense 
             damage = max(5, damage) # Make sure damage is at least 1
@@ -167,7 +175,7 @@ class Player:
         else:
             return self.attack(target=target)
     
-    def use_magic(self, effects, target=None):
+    def use_magic(self, effects, target: 'Player'=None):
         if effects:
             player = target if target else self
             
@@ -190,7 +198,7 @@ class Player:
                     print("Attack Dodged!")
 
                 player.attr[PlayerStat.health] = max(0, player.attr[PlayerStat.health] - damage) # Apply damage
-                self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0) - 5) # reduce player stamina
+                self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0)) # reduce player stamina
                 print(f"{self.name} cast magic on {player.name} for {damage} damage!")
 
             else:
@@ -212,7 +220,7 @@ class Player:
             print('cannot use this spell')
             return 1
 
-    def use_item(self, effects, target=None):
+    def use_item(self, effects, target: 'Player'=None):
         res = ''
         if effects:
             player = target if target else self
@@ -227,19 +235,20 @@ class Player:
         res += f'from {self.name}\'s potion!'
         print(res)
 
-    def use(self, item, target=None):
+    def use(self, item, target: 'Player'=None, use_armor=True):
         effects = item.use()
-        if item.uses == 0:
-            self.items[item.type].remove(item)
-        if item.type == 0:
+        if item.type == ItemType.potion:
             self.use_item(effects, target)
-        elif item.type == 1:
+        elif item.type == ItemType.magic:
             self.use_magic(effects, target)
-        elif item.type == 2:
-            return self.use_attack(effects, target)
+        elif item.type == ItemType.weapon:
+            return self.use_attack(effects, target, use_armor=use_armor)
+        
+        if item.uses == 0 and item in self.items[item.type]:
+            self.items[item.type].remove(item)
         return effects
 
-    def give(self, item, target):
+    def give(self, item: item.Item, target: 'Player'):
         temp = item
         self.items[item.type].remove(item)
         target.items[item.type].append(temp)

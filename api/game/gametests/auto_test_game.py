@@ -7,11 +7,11 @@ sys.path.append(os.path.dirname(PARENT_DIR))
 from game.gamefiles import battle, party
 from game.gametests import utils
 
-num_classes = 4
+num_classes = 5
 master_stats = {level: {'Player':{},'Enemy':{}} for level in range(num_classes)}
 
-num_games = 100
-party_size = 3
+num_games = 500
+party_size = 5
 for diff in range(num_games):
     level_avg = 100/(1+num_classes) * (1+ diff%num_classes)#random.randint(20,80)
     level_sd = (20/num_classes)#random.randint(1,15)

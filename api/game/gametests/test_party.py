@@ -6,6 +6,9 @@ sys.path.append(os.path.dirname(PARENT_DIR))
 import pytest
 from game.gamefiles import party as party_lib
 from game.gamefiles import player as player_lib
+from game.gamefiles import g_vars as gv
+ItemType = gv.ItemType
+PlayerStat = gv.PlayerStat
 
 @pytest.fixture
 def basic_party():
@@ -21,7 +24,7 @@ def test_validate_party_valid(basic_party):
     assert basic_party.validate_party() == True
 
 def test_validate_party_invalid(basic_party):
-    basic_party.players[0].attr["LVL"] = -10  
+    basic_party.players[0].attr[PlayerStat.level] = -10  
     assert basic_party.validate_party() == False
 
 def test_get_alive_players(basic_party):

@@ -4,6 +4,7 @@ ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 import os
 import time
+from game.gametests import utils
 
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -27,7 +28,7 @@ class Battle:
         assert self.player_party.validate_party() # player party memebers invalid
         assert self.enemy_party.validate_party() # enemy party memebers invalid
 
-    def play_turn(self, mode='enemy', debug=False):
+    def play_turn(self, mode='enemy', debug=False, auto_play=False):
         if debug:
             print('Debug mode:', debug)
         if mode == 'enemy':
@@ -60,6 +61,8 @@ class Battle:
             if len(op_party) < 1: break
 
             if debug and mode=='player':
+                print(utils.colorize('Using Default Attack', 'red'))
+                print(utils.colorize('', ''))
                 use_log = player.attack(random.choice(op_party))
                 break
 
@@ -76,6 +79,7 @@ class Battle:
             # random action for bot
             else:
                 action = random.choices(['attack', 'use', 'pass'], weights=[0.33, 0.33, 0.33])[0]
+                print(utils.colorize(f'{toggle.name}', 'red' if mode == 'enemy' else 'cyan'), utils.colorize(f'Team making action:', 'green'), utils.colorize(f'{action}', 'white'))
 
             # Action - Pass: regens HP, MP, STA
             if (mode == 'player' and action == 'pass') or (mode != 'player' and (player.attr[PlayerStat.mana] < 30 or player.attr[PlayerStat.stamina] < 30)):
@@ -108,13 +112,19 @@ class Battle:
                     weapon = prompt_user(prompt=prompt, invalid=lambda x: x not in range(-1,len(weapon_choice)), fn=lambda x: int(x))
                     if not debug:
                         clr_t()
+                # Decide to use armor 
+                if mode == 'enemy' and not auto_play:
+                    ans = prompt_user(f'{target.name} is being attacked... Use armor for extra DEF? [Y]/[N]', invalid=lambda x: x in ['Y','N'], fn=lambda x: str.upper(x.split()[0]))
+                    use_armor = True if ans == 'Y' else False
+                else:
+                    use_armor = True
                 # Use weapon attack
                 if weapon >= 0:
                     weapon = weapon_choice[weapon]
-                    use_log = player.use(weapon, target)
+                    use_log = player.use(weapon, target, use_armor=use_armor)
                 # Use fist attack
                 else:
-                    use_log = player.attack(target)
+                    use_log = player.attack(target, use_armor=use_armor)
             
             # Action - Use an Item
             elif mode != 'player' or (mode == 'player' and action.startswith('use')):
@@ -203,14 +213,14 @@ class Battle:
         # Player turn
         self.validate()
         if auto_play:
-            p_stats = self.play_turn(mode='auto', debug=debug)
+            p_stats = self.play_turn(mode='auto', debug=debug, auto_play=auto_play)
         else:
-            p_stats = self.play_turn(mode='player', debug=debug)
+            p_stats = self.play_turn(mode='player')
         p_stats['moves'] = p_stats.get('moves',0) + len(self.player_party.get_alive_players())
         p_stats['turns'] = p_stats.get('turns',0) + 1
         # Enemy turn 
         self.validate()
-        e_stats = self.play_turn(mode='enemy')
+        e_stats = self.play_turn(mode='enemy', debug=debug)
         e_stats['moves'] = e_stats.get('moves',0)  + len(self.enemy_party.get_alive_players())
         e_stats['turns'] = e_stats.get('turns',0) + 1
         return p_stats, e_stats
@@ -233,7 +243,7 @@ class Battle:
         p_stats = agg(p_stats, {'Wins': 1} if self.player_party.get_alive_players() else {'Losses': 1})
         e_stats = agg(e_stats, {'Wins': 1} if self.enemy_party.get_alive_players() else {'Losses': 1})
         
-        if not debug:
+        if not debug and auto_play:
             clr_t()
             print("Combat over!")
             if len(self.player_party.get_alive_players()) > 0:

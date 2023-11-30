@@ -5,29 +5,31 @@ PARENT_DIR = os.path.dirname(CURRENT_DIR)
 sys.path.append(os.path.dirname(PARENT_DIR))
 import pytest
 from game.gamefiles import item as item_lib
+from game.gamefiles import g_vars as gv
+ItemType = gv.ItemType
+PlayerStat = gv.PlayerStat
 
 @pytest.fixture
 def basic_item():
-    yield item_lib.Item("Health Potion", 0, 3, {"HP": 20})
+    yield item_lib.Item(ItemType.potion, 3, {PlayerStat.health: 20})
 
 def test_item_init(basic_item):
-    assert basic_item.name == "Health Potion"
-    assert basic_item.cat == 0
+    assert basic_item.type == ItemType.potion
     assert basic_item.uses == 3
-    assert basic_item.effects == {"HP": 20}
+    assert basic_item.effects == {PlayerStat.health: 20}
 
 def test_item_str(basic_item):
-    assert str(basic_item) == "Health Potion - Type: 0 Uses: 3, Effects [ HP: 20 ]"
+    assert str(basic_item) == "potion - Rank: 60, Uses: 3, Effects [ HP: 20 ]"
 
 def test_validate_effects_valid(basic_item):
     assert basic_item.validate_effects() == True
 
 def test_validate_effects_invalid(basic_item):
-    basic_item.effects = {"HP": 150} 
+    basic_item.effects = {PlayerStat.health: 150} 
     assert basic_item.validate_effects() == False
 
 def test_use_item(basic_item):
-    assert basic_item.use() == {"HP": 20}
+    assert basic_item.use() == {PlayerStat.health: 20}
     assert basic_item.uses == 2
 
 def test_use_broken_item(basic_item):
@@ -36,12 +38,13 @@ def test_use_broken_item(basic_item):
 
 def test_generate_items():
     bag = item_lib.generate_items(10, 100)
-    assert len(bag[0]) > 0 
-    assert len(bag[1]) > 0
-    assert len(bag[2]) > 0
-    assert len(bag[3]) > 0
-    for item in bag[0]:
-        assert isinstance(item, item_lib.Item)
+    assert len(bag[ItemType.potion]) > 0 
+    assert len(bag[ItemType.magic]) > 0
+    assert len(bag[ItemType.weapon]) > 0
+    assert len(bag[ItemType.armor]) > 0
+    for item_list in bag.values():
+        for item in item_list:
+            assert isinstance(item, item_lib.Item)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,9 @@ import pytest
 from game.gamefiles import battle as battle_lib
 from game.gamefiles import party as party_lib
 from game.gamefiles import player as player_lib
+from game.gamefiles import g_vars as gv
+ItemType = gv.ItemType
+PlayerStat = gv.PlayerStat
 
 @pytest.fixture
 def basic_battle():
@@ -26,7 +29,7 @@ def test_battle_init(basic_battle):
 
 def test_agg():
     store = {}
-    sample = {"HP": 10, "MP": 5}
+    sample = {PlayerStat.health: 10, PlayerStat.mana: 5}
     updated = battle_lib.agg(store, sample)
     assert updated == sample
 
@@ -37,21 +40,21 @@ def test_player_turn(basic_battle):
 def test_auto_turn(basic_battle):
     stats = basic_battle.play_turn(mode='auto', debug=True)
     assert stats
-    assert stats.get("ATK", 0) >= 0
+    assert stats.get(PlayerStat.attack, 0) >= 0
 
 def test_enemy_turn(basic_battle):
     stats = basic_battle.play_turn(mode='enemy', debug=True)
     assert stats
-    assert stats.get("ATK", 0) >= 0
+    assert stats.get(PlayerStat.attack, 0) >= 0
    
 def test_combat_round(basic_battle):
-    initial_hp = basic_battle.enemy_party.players[0].attr["HP"]
+    initial_hp = basic_battle.enemy_party.players[0].attr[PlayerStat.health]
     basic_battle.combat_round(debug=True)
-    final_hp = basic_battle.enemy_party.players[0].attr["HP"]
+    final_hp = basic_battle.enemy_party.players[0].attr[PlayerStat.health]
     assert final_hp <= initial_hp
     
 def test_start(basic_battle): 
-    basic_battle.start(debug=True)
+    basic_battle.start_game(debug=True, auto_play=True)
     assert (basic_battle.player_party.get_alive_players() 
             or basic_battle.enemy_party.get_alive_players())
     
