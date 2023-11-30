@@ -12,12 +12,12 @@ const buttonVariant = cva(
                 secondary_brown : 
                     'transition bg-gradient-to-t from-red-800 to-red-500',
                 inventory : 
-                    'transition bg-gradient-to-t from-red-800 to-red-500',
+                    'transition bg-gradient-to-t from-green-900 to-green-700',
             },
             size : {
-                default : "h-10 py-2 px-4",
-                sm : 'h-9 px-2',
-                lg : "h-11 py-4 px-4"
+                default : "h-8 py-2 px-4",
+                sm : 'h-9 w-60 px-2',
+                lg : "h-40 w-80 py-4 px-4"
             }
         },
         defaultVariants : {
@@ -27,9 +27,9 @@ const buttonVariant = cva(
     }
 )
 
-const Button = ({className, size, variant, ...props}) => {
+const Button = ({className, size, variant, handleClick, ...props}) => {
     return (
-        <button className={cn(buttonVariant({variant, size}), className)} {...props} />
+        <button className={cn(buttonVariant({variant, size}), className)} onClick={handleClick} {...props} />
     )
 }
 

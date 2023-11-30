@@ -184,3 +184,4 @@ yarn.lock
 .yarnrc.yml
 
 dnd-client/.eslintrc.cjs
+install_nvm.sh
