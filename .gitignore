@@ -173,4 +173,14 @@ api/.env
 
 .vscode
 
+.yarn
+
 yarn.lock
+
+.storybook
+
+.yarnrc
+
+.yarnrc.yml
+
+dnd-client/.eslintrc.cjs
