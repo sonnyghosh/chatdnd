@@ -1,4 +1,6 @@
-from . import player
+from . import player, g_vars
+ItemType = g_vars.ItemType
+PlayerStat = g_vars.PlayerStat
 import random
 
 class Party:
@@ -25,7 +27,7 @@ class Party:
         return len(self.players)
 
     def get_alive_players(self):
-        return [p for p in self.players if p.attr["HP"] > 0]
+        return [p for p in self.players if p.attr[PlayerStat.health] > 0]
     
     def get_party_members_names(self):
         res = f'{self.name}\n'

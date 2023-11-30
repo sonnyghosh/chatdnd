@@ -1,0 +1,59 @@
+import sys
+import os
+CURRENT_DIR = os.path.dirname(__file__)
+PARENT_DIR = os.path.dirname(CURRENT_DIR)
+sys.path.append(os.path.dirname(PARENT_DIR))
+import pytest
+from game.gamefiles import battle as battle_lib
+from game.gamefiles import party as party_lib
+from game.gamefiles import player as player_lib
+
+@pytest.fixture
+def basic_battle():
+    p1 = player_lib.generate_player("Alice", level=100)
+    p2 = player_lib.generate_player("Bob", level=100)
+    player_party = party_lib.Party([p1, p2], "Heroes")
+    
+    e1 = player_lib.generate_player("Zog", level=10) 
+    e2 = player_lib.generate_player("Vog", level=10)
+    enemy_party = party_lib.Party([e1, e2], "Enemies")
+    
+    yield battle_lib.Battle(player_party, enemy_party)
+
+def test_battle_init(basic_battle):
+    assert isinstance(basic_battle.player_party, party_lib.Party)
+    assert isinstance(basic_battle.enemy_party, party_lib.Party)   
+
+def test_agg():
+    store = {}
+    sample = {"HP": 10, "MP": 5}
+    updated = battle_lib.agg(store, sample)
+    assert updated == sample
+
+def test_player_turn(basic_battle):
+    basic_battle.play_turn(mode='player', debug=True)  
+    assert len(basic_battle.player_party.get_alive_players()) == 2
+
+def test_auto_turn(basic_battle):
+    stats = basic_battle.play_turn(mode='auto', debug=True)
+    assert stats
+    assert stats.get("ATK", 0) >= 0
+
+def test_enemy_turn(basic_battle):
+    stats = basic_battle.play_turn(mode='enemy', debug=True)
+    assert stats
+    assert stats.get("ATK", 0) >= 0
+   
+def test_combat_round(basic_battle):
+    initial_hp = basic_battle.enemy_party.players[0].attr["HP"]
+    basic_battle.combat_round(debug=True)
+    final_hp = basic_battle.enemy_party.players[0].attr["HP"]
+    assert final_hp <= initial_hp
+    
+def test_start(basic_battle): 
+    basic_battle.start(debug=True)
+    assert (basic_battle.player_party.get_alive_players() 
+            or basic_battle.enemy_party.get_alive_players())
+    
+if __name__ == "__main__":
+    sys.exit(pytest.main(["-v", "-s", "./api/game/gametests/test_battle.py"]))

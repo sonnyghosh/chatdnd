@@ -1,6 +1,8 @@
 import random
-from . import item
-
+from . import item, g_vars
+ItemType = g_vars.ItemType
+PlayerStat = g_vars.PlayerStat
+config = g_vars.config
 """
 Item Documentation:
     Represents an item in a video game.
@@ -15,7 +17,7 @@ Item Documentation:
             - returns dict of effects {str:'stat/attr': int:value, ...}
     """
 
-item_names = ['potion', 'magic', 'weapon', 'armor']
+item_names = config['item']['names']
 
 class Player:
     '''
@@ -49,17 +51,27 @@ class Player:
         self.attr = attr
         self.items = items
         self.usable_items = True
+        self.get_rank()
     
+    def get_rank(self):
+        stat_rank = sum(self.stats.values())
+        items_rank = sum([sum([i.rank for i in it]) for it in self.items.values()])
+        attr_rank = sum([att for key, att in self.attr.items() if key != 'name'])
+        self.rank = stat_rank + items_rank + attr_rank
+        return stat_rank + items_rank + attr_rank
+
     def validate_player(self):
         # Validate stats
         for stat, value in self.stats.items():
             if not (0 <= value <= 50):
-                raise ValueError(f"Invalid {stat} value for {self.name} - {value}. Valid range: {range(0,50)}")
+                print(f"Invalid {stat} value for {self.name} - {value}. Valid range: {range(0,50)}")
+                return False
 
         # Validate attributes
         for attr, value in self.attr.items():
             if attr != 'name' and not (0 <= value <= 100):
-                raise ValueError(f"Invalid {attr} value for {self.name} - {value}. Valid range: {range(0,100)}")
+                print(f"Invalid {attr} value for {self.name} - {value}. Valid range: {range(0,100)}")
+                return False
 
         # Validate items
         for item_type, item_list in self.items.items():
@@ -77,44 +89,20 @@ class Player:
             res += f'\n\t{item_names[typ]}:{spacer}{"".join([str(x) + spacer for x in lst if x.uses != 0])}'
         return res
 
-    def get_weapons(self):
-        return [w for w in self.items[2] if w.uses != 0]
-
-    def get_item_ind(self, ind):
-        return [w for w in self.items[ind] if w.uses != 0]
-
-    def get_weapons_str(self, spacer='\t'):
-        res = f'Weapons:\n'
-        for idx, itm in enumerate(self.get_weapons()):
+    def get_item_type_str(self, itemtype, prefix='', spacer='\t'):
+        res = f'{itemtype.name}\n'
+        res += prefix
+        for idx, itm in enumerate(self.get_item_type(itemtype=itemtype)):
             res += spacer
             res += f'{idx}. {itm}\n'
         return res
-    
-    def get_armor_str(self, spacer = '\t'):
-        res = f'Armor:\n'
-        for idx, itm in enumerate(self.items[3]):
-            res += f'{spacer}{idx}. {itm}\n'
-        return res
-    
-    def get_potions_str(self):
-        spacer = '\n\t'
-        res = f'{spacer}0) Potions:'
-        spacer += '  '
-        for idx, itm in enumerate(self.items[0]):
-            res += f'{spacer}{idx}. {itm}'
-        return res
-    
-    def get_magic_str(self):
-        spacer = '\n\t'
-        res = f'{spacer}1) Magic:'
-        spacer += '  '
-        for idx, itm in enumerate(self.items[1]):
-            res += f'{spacer}{idx}. {itm}'
-        return res
+
+    def get_item_type(self, itemtype):
+        return [w for w in self.items[itemtype] if w.uses != 0]
 
     def __str__(self) -> str:
         # print out the name of the player
-        res = f'\t--------| {self.name} |---------\n'
+        res = f'\t--------| {self.name} - {self.rank} |---------\n'
 
         # print all of the player stats
         res += '\tStats:'
@@ -142,7 +130,7 @@ class Player:
         return random.randint(int(min_roll), int(max_roll))
 
     def attack(self, target):
-        return self.use_attack({'ATK':0, 'STA': -random.randint(1,4)}, target)
+        return self.use_attack({PlayerStat.attack:0, PlayerStat.stamina: -random.randint(1,4)}, target)
 
     def use_attack(self, effects, target):
          # use item to get effects
@@ -152,30 +140,30 @@ class Player:
             target_role = target.get_dice_roll()
             
         
-            damage = self.stats["ATK"] # Calculate base damage 
-            damage += effects.get("ATK", 0)   # Add damage effects from item
+            damage = self.stats[PlayerStat.attack] # Calculate base damage 
+            damage += effects.get(PlayerStat.attack, 0)   # Add damage effects from item
             
             # chance for critical hit based on roll
             if 15 < attacker_role:
                 damage *= 2
                 print("Critical hit!")
 
-            damage -= int(target.stats["DEF"]*(target.attr['LVL']/100)) # Reduce damage based on target's defense 
-            damage = max(1, damage) # Make sure damage is at least 1
+            damage -= int(target.stats[PlayerStat.defense]*(target.attr[PlayerStat.level]/100)) # Reduce damage based on target's defense 
+            damage = max(5, damage) # Make sure damage is at least 1
             
             # chance to dodge based on role
             if target_role > 16:
-                damage == 0
+                damage == 0 
                 print("Attack Dodged!")
 
-            target.attr["HP"] = max(0, target.attr["HP"] - damage) # Apply damage 
-            sta_degredation = effects.get('STA', 0) - random.randint(1,4)
-            self.attr['STA'] += sta_degredation # reduce player stamina
-            if effects.get('ATK', 0) == 0:
-                print(f"{self.name} [{target.attr['STA']} STA] Lost {sta_degredation} STA attacking {target.name} [{target.attr['HP']} HP] for {damage} damage!") # Print attack message
+            target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
+            sta_degredation = effects.get(PlayerStat.stamina, 0) - random.randint(1,4)
+            self.attr[PlayerStat.stamina] += sta_degredation # reduce player stamina
+            if effects.get(PlayerStat.attack, 0) == 0:
+                print(f"{self.name} [{target.attr[PlayerStat.stamina]} STA] Lost {sta_degredation} STA attacking {target.name} [{target.attr[PlayerStat.health]} HP] for {damage} damage!") # Print attack message
             else:
-                print(f"{self.name} [{target.attr['STA']} STA] Lost {sta_degredation} STA attacking {target.name} [{target.attr['HP']} HP] for {damage} damage with a weapon!") # Print attack message
-            return damage, sta_degredation
+                print(f"{self.name} [{target.attr[PlayerStat.stamina]} STA] Lost {sta_degredation} STA attacking {target.name} [{target.attr[PlayerStat.health]} HP] for {damage} damage with a weapon!") # Print attack message
+            return {PlayerStat.attack:damage, PlayerStat.stamina: sta_degredation}
         else:
             return self.attack(target=target)
     
@@ -183,33 +171,33 @@ class Player:
         if effects:
             player = target if target else self
             
-            if 'ATK' in effects.keys():
+            if PlayerStat.attack in effects.keys():
                 attacker_role = self.get_dice_roll()
                 target_role = player.get_dice_roll()
 
-                damage = self.stats["ATK"] # Calculate base damage 
-                damage += effects.get("ATK", 0)   # Add damage effects from item
+                damage = self.stats[PlayerStat.attack] # Calculate base damage 
+                damage += effects.get(PlayerStat.attack, 0)   # Add damage effects from item
 
                 if 17 < attacker_role:
                     damage *= 2
                     print("Critical hit!")
 
-                damage -= player.stats["DEF"] # Reduce damage based on target's defense 
+                damage -= player.stats[PlayerStat.defense] # Reduce damage based on target's defense 
                 damage = max(1, damage) # Make sure damage is at least 1
 
                 if target_role > 17:
                     damage == 0
                     print("Attack Dodged!")
 
-                player.attr["HP"] = max(0, player.attr['HP'] - damage) # Apply damage
-                self.attr['MP'] = max(0,self.attr['MP'] + effects.get('MP', 0) - 5) # reduce player stamina
+                player.attr[PlayerStat.health] = max(0, player.attr[PlayerStat.health] - damage) # Apply damage
+                self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0) - 5) # reduce player stamina
                 print(f"{self.name} cast magic on {player.name} for {damage} damage!")
 
             else:
                 buff = list(effects.keys())
-                buff.remove('MP')
-                cost = effects['MP']
-                self.attr['MP'] += cost
+                buff.remove(PlayerStat.mana)
+                cost = effects[PlayerStat.mana]
+                self.attr[PlayerStat.mana] += cost
                 res = f'{self.name} cast magic on {player.name} to give them '
                 for att in buff:
                     res += f'+{effects[att]} {att} '
@@ -241,30 +229,42 @@ class Player:
 
     def use(self, item, target=None):
         effects = item.use()
-        if item.cat == 0:
+        if item.uses == 0:
+            self.items[item.type].remove(item)
+        if item.type == 0:
             self.use_item(effects, target)
-        elif item.cat == 1:
+        elif item.type == 1:
             self.use_magic(effects, target)
-        elif item.cat == 2:
-            self.use_attack(effects, target)
+        elif item.type == 2:
+            return self.use_attack(effects, target)
         return effects
+
+    def give(self, item, target):
+        temp = item
+        self.items[item.type].remove(item)
+        target.items[item.type].append(temp)
+
+    def sort_inv(self):
+        for item_list in self.items.values():
+            item_list.sort(key=lambda x: (x.rank, next(iter(x.effects.values()))), reverse=True)
+        return self
 
 def generate_player(name, level=None):
     attr = {
-        'LVL': level if level else random.randint(25,100),
-        'HP': 100,
-        'MP': 100,
-        'STA': 100,
+        PlayerStat.level: level if level else random.randint(25,100),
+        PlayerStat.health: 100,
+        PlayerStat.mana: 100,
+        PlayerStat.stamina: 100,
         'name': name,
     }
 
     stats = {
-        'ATK': min(50,int(random.randint(1+int(attr['LVL']/5),1+int(attr['LVL']/1.75)))),
-        'DEF': min(50,int(random.randint(1+int(attr['LVL']/5),1+int(attr['LVL']/1.75)))),
-        'CHA': min(50,int(random.randint(1+int(attr['LVL']/5),1+int(attr['LVL']/1.75)))),
-        'INT': min(50,int(random.randint(1+int(attr['LVL']/5),1+int(attr['LVL']/1.75)))),
-        'WIS': min(50,int(random.randint(1+int(attr['LVL']/5),1+int(attr['LVL']/1.75))))
+        PlayerStat.attack: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
+        PlayerStat.defense: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
+        PlayerStat.charisma: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
+        PlayerStat.intelligence: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
+        PlayerStat.wisdom: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75))))
     }
 
-    items = item.generate_items(random.randint(12,18), attr['LVL'])
-    return Player(stats=stats, attr=attr, items=items)
+    items = item.generate_items(random.randint(12,18), attr[PlayerStat.level])
+    return Player(stats=stats, attr=attr, items=items).sort_inv()
