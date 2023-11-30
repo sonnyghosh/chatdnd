@@ -5,18 +5,57 @@ def agg(store, sample):
     store.update({key: store.get(key, 0) + val for key, val in sample.items()})
     return store
 
-def colorize(text, color):
+def colorize(text, color_list):
+    color_list = color_list if type(color_list) is list else [color_list]
     colors = {
-        'reset': '\033[0m',
-        'red': '\033[91m',
-        'green': '\033[92m',
-        'yellow': '\033[93m',
-        'blue': '\033[94m',
-        'purple': '\033[95m',
-        'cyan': '\033[96m',
-        'white': '\033[97m'
+        # default
+        'reset': '\033[0m',  
+        # styles 
+        'bold': '\033[1m',
+        'underline': '\033[4m',
+        'invert': '\033[7m',
+
+        # text colors 
+        'black': '\033[30m',
+        'red': '\033[31m',
+        'green': '\033[32m',
+        'yellow': '\033[33m',
+        'blue': '\033[34m',
+        'magenta': '\033[35m',
+        'cyan': '\033[36m',
+        'white': '\033[37m',
+
+        # background colors
+        'on_black': '\033[40m', 
+        'on_red': '\033[41m',
+        'on_green': '\033[42m',
+        'on_yellow': '\033[43m',  
+        'on_blue': '\033[44m',
+        'on_magenta': '\033[45m', 
+        'on_cyan': '\033[46m',
+        'on_white': '\033[47m',  
+
+        # bright colors
+        'bright_black': '\033[90m',
+        'bright_red': '\033[91m',
+        'bright_green': '\033[92m',
+        'bright_yellow': '\033[93m',
+        'bright_blue': '\033[94m',
+        'bright_magenta': '\033[95m',
+        'bright_cyan': '\033[96m',
+        'bright_white': '\033[97m',
+
+        # bright background 
+        'on_bright_black': '\033[100m',
+        'on_bright_red': '\033[101m',  
+        'on_bright_green': '\033[102m',
+        'on_bright_yellow': '\033[103m',
+        'on_bright_blue': '\033[104m',
+        'on_bright_magenta': '\033[105m',
+        'on_bright_cyan': '\033[106m',
+        'on_bright_white': '\033[107m'  
     }
-    return f'{colors[color]}{text}{colors["reset"]}'
+    return f'{"".join([colors[c] for c in color_list])}{text}{colors["reset"]}'
 
 def summarize(title, dicti, games=1, classes=1):
     A = [PlayerStat.attack,PlayerStat.attack,PlayerStat.stamina,PlayerStat.stamina,PlayerStat.mana,PlayerStat.mana,PlayerStat.health,PlayerStat.health]

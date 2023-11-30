@@ -2,6 +2,7 @@ import random
 from . import party, g_vars
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
+StatColor = g_vars.StatColor
 import os
 import time
 from game.gametests import utils
@@ -29,6 +30,7 @@ class Battle:
         assert self.enemy_party.validate_party() # enemy party memebers invalid
 
     def play_turn(self, mode='enemy', debug=False, auto_play=False):
+        print()
         if debug:
             print('Debug mode:', debug)
         if mode == 'enemy':
@@ -60,29 +62,27 @@ class Battle:
             op_party = op_toggle.get_alive_players()
             if len(op_party) < 1: break
 
+            # print out all of the players that are still alive
             if debug and mode=='player':
                 print(utils.colorize('Using Default Attack', 'red'))
-                print(utils.colorize('', ''))
                 use_log = player.attack(random.choice(op_party))
                 break
 
             # determine action to take 
             if mode == 'player':
-                # print out all of the players that are still alive
                 print(op_toggle.get_party_members_names())
                 print(toggle.get_party_members_names())
-
                 # prompt user to make a move
                 prompt = f'{player.name}\'s turn!\nHere is {player.name}\'s redout:\n{player}\n - To attack type "attack"\n - To use an item type "use (Item type #)"\n - To regen HP, MP, and STA type "pass"\nAction: '
                 action = prompt_user(prompt=prompt, invalid=lambda x: x not in ['attack', 'pass'] and len(x.split()) < 2)
             
             # random action for bot
             else:
-                action = random.choices(['attack', 'use', 'pass'], weights=[0.33, 0.33, 0.33])[0]
+                action = random.choices(['attack', 'use'], weights=[0.7, 0.3])[0]
                 print(utils.colorize(f'{toggle.name}', 'red' if mode == 'enemy' else 'cyan'), utils.colorize(f'Team making action:', 'green'), utils.colorize(f'{action}', 'white'))
 
             # Action - Pass: regens HP, MP, STA
-            if (mode == 'player' and action == 'pass') or (mode != 'player' and (player.attr[PlayerStat.mana] < 30 or player.attr[PlayerStat.stamina] < 30)):
+            if action == 'pass' or (mode != 'player' and (player.attr[PlayerStat.mana] < player.attr[PlayerStat.level]/2 or player.attr[PlayerStat.stamina] < player.attr[PlayerStat.level]/2)):
                 stamina_gain = int(player.attr[PlayerStat.level]/10) + random.randint(0,5)
                 mana_gain = int(player.attr[PlayerStat.level]/10) + random.randint(0,5)
                 health_gain = int(player.attr[PlayerStat.level]/10) + random.randint(0,5)
@@ -92,9 +92,9 @@ class Battle:
                 if mode == 'player':
                     clr_t()
                 st = agg(st, {PlayerStat.stamina : stamina_gain, PlayerStat.health : health_gain, PlayerStat.mana: mana_gain})
-                print(f'{player.name} has rested and gained {health_gain} HP, {mana_gain} MP and {stamina_gain} STA.')
+                print(f'{player.name} has rested and gained {utils.colorize("+"+str(health_gain)+" HP", "green")}, {utils.colorize("+"+str(mana_gain)+" MP", "magenta")} and {utils.colorize("+"+str(stamina_gain)+" STA", "yellow")}.')
 
-            # Action - Use Attack
+            # Action - Attack
             elif (mode == 'player' and action == 'attack') or (mode != 'player' and random.random() > 0.3):
                 weapon_choice = player.get_item_type(ItemType.weapon)
                 # choosing a weapon from 'weapon_choice'
@@ -147,7 +147,7 @@ class Battle:
                     item = random.choice(possible)
                 # player Picks Item to use
                 else:
-                    print(action)
+                    #print(action)
                     spacer = '\n\t'
                     item_list = player.items[ItemType(int(action.split()[1]))] 
                     prompt = f'{player.name}\'s Current Items:{spacer}{"".join([str(i)+". "+str(x)+ spacer for i, x in enumerate(item_list)])}\nPlease enter the item that you want to use: '
@@ -210,8 +210,10 @@ class Battle:
         return st
 
     def combat_round(self, debug=False, auto_play=False):
+        if not debug:
+            print(self.player_party.get_party_members_names())
+            print(self.enemy_party.get_party_members_names())
         # Player turn
-        self.validate()
         if auto_play:
             p_stats = self.play_turn(mode='auto', debug=debug, auto_play=auto_play)
         else:
@@ -219,10 +221,10 @@ class Battle:
         p_stats['moves'] = p_stats.get('moves',0) + len(self.player_party.get_alive_players())
         p_stats['turns'] = p_stats.get('turns',0) + 1
         # Enemy turn 
-        self.validate()
         e_stats = self.play_turn(mode='enemy', debug=debug)
         e_stats['moves'] = e_stats.get('moves',0)  + len(self.enemy_party.get_alive_players())
         e_stats['turns'] = e_stats.get('turns',0) + 1
+        self.validate()
         return p_stats, e_stats
     
     def start_game(self, debug=False, auto_play=False, readable=False):

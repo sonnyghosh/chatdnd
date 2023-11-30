@@ -122,7 +122,7 @@ def generate_items(n_items, level):
         elif ind == 2:
             item_name = g_vars.ItemType(ind)
             item_uses = random.randint(int(level/5),int(level/4))
-            effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/3))))
+            effect_bonus = max(2,min(30,random.randint(int(level/5),int(level/2.5))))
             side_effect = int(-effect_bonus * (random.random()*0.5+0.5))
             item_effects = {PlayerStat.attack: effect_bonus,PlayerStat.stamina: side_effect}
         

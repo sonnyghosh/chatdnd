@@ -49,7 +49,7 @@ def test_enemy_turn(basic_battle):
    
 def test_combat_round(basic_battle):
     initial_hp = basic_battle.enemy_party.players[0].attr[PlayerStat.health]
-    basic_battle.combat_round(debug=True)
+    basic_battle.combat_round(debug=True, auto_play=True)
     final_hp = basic_battle.enemy_party.players[0].attr[PlayerStat.health]
     assert final_hp <= initial_hp
     

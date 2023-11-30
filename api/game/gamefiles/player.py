@@ -2,7 +2,9 @@ import random
 from . import item, g_vars
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
+StatColor = g_vars.StatColor
 config = g_vars.config
+from game.gametests import utils
 """
 Item Documentation:
     Represents an item in a video game.
@@ -116,8 +118,8 @@ class Player:
         res += '|'
         #print out player items
         res += '\n\tItems:'
-        res += self.get_potions_str()
-        res += self.get_magic_str()
+        res += self.get_item_type_str(ItemType.potion)
+        res += self.get_item_type_str(ItemType.magic)
         res += '\n\t-------------------------'
         return res
 
@@ -165,12 +167,12 @@ class Player:
                 print("Attack Dodged!")
 
             target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
-            sta_degredation = effects.get(PlayerStat.stamina, 0) - random.randint(1,4)
+            sta_degredation = max(0,effects.get(PlayerStat.stamina, 0) - random.randint(1,4))
             self.attr[PlayerStat.stamina] += sta_degredation # reduce player stamina
             if effects.get(PlayerStat.attack, 0) == 0:
-                print(f"{self.name} [{target.attr[PlayerStat.stamina]} STA] Lost {sta_degredation} STA attacking {target.name} [{target.attr[PlayerStat.health]} HP] for {damage} damage!") # Print attack message
+                print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)}!") # Print attack message
             else:
-                print(f"{self.name} [{target.attr[PlayerStat.stamina]} STA] Lost {sta_degredation} STA attacking {target.name} [{target.attr[PlayerStat.health]} HP] for {damage} damage with a weapon!") # Print attack message
+                print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)} with a \033[1m\033[4mweapon\033[0m!") # Print attack message
             return {PlayerStat.attack:damage, PlayerStat.stamina: sta_degredation}
         else:
             return self.attack(target=target)
@@ -199,21 +201,21 @@ class Player:
 
                 player.attr[PlayerStat.health] = max(0, player.attr[PlayerStat.health] - damage) # Apply damage
                 self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0)) # reduce player stamina
-                print(f"{self.name} cast magic on {player.name} for {damage} damage!")
+                print(f"{self.name} used {utils.colorize(self.attr[PlayerStat.mana], StatColor.mana.value)} cast magic on {player.name} for {utils.colorize(damage, StatColor.attack.value)} damage!")
 
             else:
                 buff = list(effects.keys())
                 buff.remove(PlayerStat.mana)
                 cost = effects[PlayerStat.mana]
                 self.attr[PlayerStat.mana] += cost
-                res = f'{self.name} cast magic on {player.name} to give them '
+                res = f'{self.name} used [{utils.colorize(str(cost), StatColor.mana.value)}] cast magic on {player.name} to give them ['
                 for att in buff:
-                    res += f'+{effects[att]} {att} '
+                    res += utils.colorize(f'+{effects[att]} {att.value}', PlayerStat(att).color().value)
                     if att in player.attr.keys():
                         player.attr[att] = min(100, effects[att] + player.attr[att])
                     elif att in player.stats.keys():
                         player.stats[att] = min(50, effects[att] + player.stats[att])
-                print(res)
+                print(res+']')
             
             return 0
         else:
@@ -226,13 +228,13 @@ class Player:
             player = target if target else self
             res += f'{player.name} recieved '
             for key, val in effects.items():
-                res += f'+{val} {key} '
+                res += utils.colorize(f'+{val} {key.value}', PlayerStat(key).color().value)
                 if key in player.stats.keys():
                     player.stats[key] = min(50, val + player.stats[key])
 
                 elif key in player.attr.keys():
                     player.attr[key] = min(100, val + player.attr[key])
-        res += f'from {self.name}\'s potion!'
+        res += f' from {self.name}\'s potion!'
         print(res)
 
     def use(self, item, target: 'Player'=None, use_armor=True):

@@ -1,6 +1,9 @@
 from . import player, g_vars
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
+StatColor = g_vars.StatColor
+config = g_vars.config
+from game.gametests import utils
 import random
 
 class Party:
@@ -33,8 +36,8 @@ class Party:
         res = f'{self.name}\n'
         for idx, pl in enumerate(self.get_alive_players()):
             res += f'{idx}: {pl.name} - \t'
-            res += f'|{"".join([f"{key}: {val} |" for key, val in pl.attr.items() if key != "name"])}'
-            res += f'\t|{"".join([f"{key}: {val} |" for key, val in pl.stats.items()])}\n'
+            res += f'|{"".join([utils.colorize(f"{key.name}: {val} |", key.color().value) for key, val in pl.attr.items() if key != "name"])}'
+            res += f'\t|{"".join([utils.colorize(f"{key.name}: {val} |", key.color().value) for key, val in pl.stats.items()])}\n'
         return res
     
 names = ["Blaze", "Rebel", "Ace", "Rogue", "Phoenix", "Echo", "Zenith", "Valor", "Cipher", "Nova", "Trinity", "Neo", "Onyx", "Astra", "Azure", "Bex", "Briar", "Cove", "Halo", "Ivory", "Jupiter", "Kai", "Lev", "Nyx", "Reign", "Rune", "Wren", "Zephyr"]
