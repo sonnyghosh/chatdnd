@@ -95,7 +95,8 @@ def generate_items(n_items, level):
     bag = {
         ItemType.potion:[],   # potions
         ItemType.magic:[],   # magic
-        ItemType.weapon:[],   # weapon
+        ItemType.melee:[],   # weapon
+        ItemType.ranged:[],  # ranged
         ItemType.armor:[]    # armor
     }
 
@@ -117,8 +118,16 @@ def generate_items(n_items, level):
             side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
             item_effects = {random.choices(g_vars.choices[item_name], weights=balance_dict['item']['magic_weights'])[0]: effect_bonus, PlayerStat.mana: side_effect}
 
-        # generate weapon
-        elif ind == ItemType.weapon:
+        # generate melee
+        elif ind == ItemType.melee:
+            item_name = ind
+            item_uses = random.randint(int(level/5),int(level/4))
+            effect_bonus = max(2,min(30,random.randint(int(level/5),int(level/2.5))))
+            side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
+            item_effects = {PlayerStat.attack: effect_bonus,PlayerStat.stamina: side_effect}
+
+        # generate ranged
+        elif ind == ItemType.ranged:
             item_name = ind
             item_uses = random.randint(int(level/5),int(level/4))
             effect_bonus = max(2,min(30,random.randint(int(level/5),int(level/2.5))))

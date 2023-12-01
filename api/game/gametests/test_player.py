@@ -29,8 +29,13 @@ def test_validate_player_invalid(basic_player):
     basic_player.attr[PlayerStat.health] = -10
     assert basic_player.validate_player() == False
 
-def test_get_weapons(basic_player):
-    weapons = basic_player.get_item_type(ItemType.weapon)
+def test_get_melee(basic_player):
+    weapons = basic_player.get_item_type(ItemType.melee)
+    assert isinstance(weapons, list)
+    assert all(isinstance(w, item_lib.Item) for w in weapons)
+
+def test_get_ranged(basic_player):
+    weapons = basic_player.get_item_type(ItemType.ranged)
     assert isinstance(weapons, list)
     assert all(isinstance(w, item_lib.Item) for w in weapons)
 
@@ -48,7 +53,7 @@ def test_attack(basic_player):
 def test_generate_player():
     player = player_lib.generate_player("Test")
     assert 0 <= player.attr[PlayerStat.level] <= 100
-    assert len(player.items) == 4
+    assert len(player.items) == 5
 
 def test_give_item(basic_player):
     player = player_lib.generate_player("Test")

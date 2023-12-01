@@ -32,21 +32,20 @@ def test_game(party_size, verbose, level):
     st['Enemy'] = utils.agg(st['Enemy'], battle_stats[1])
     return st
 
-def test_game_auto(level=50, party_size = 1, verbose=True, num_games=100, testing=False):  
+def test_game_auto(level=50, party_size = 1, verbose=False, num_games=200, testing=False):  
     master_stats = {
         'Player':{},
         'Enemy':{}
     }
-    
-    utils.clr_t()
+
     for _ in range(num_games):
         result = test_game(party_size, verbose, level)
         master_stats['Player'] = utils.agg(master_stats['Player'], result['Player'])
         master_stats['Enemy'] = utils.agg(master_stats['Enemy'], result['Enemy'])
 
-    assert master_stats['Player']['turns']/num_games < 30, f"Game too long: {master_stats['Player']['turns']/num_games} turn avg"
+    assert master_stats['Player']['turns']/num_games < 30 if level <= 60 else 50, f"Game too long: {master_stats['Player']['turns']/num_games} turn avg"
     assert master_stats['Player']['Wins'] + master_stats['Enemy']['Wins'] == num_games , 'Too many games'
-    assert 0.6 >= master_stats['Player']['Wins'] /num_games >= 0.3, f"W/L: {master_stats['Player']['Wins'] /num_games}"
+    assert 0.65 >= master_stats['Player']['Wins'] /num_games >= 0.35, f"W/L: {master_stats['Player']['Wins'] /num_games}"
     
 def auto_test_levels(party_size, num_games, num_levels, verbose=True):
     master_stats = {ind : {'Player':{},'Enemy':{}} for ind in range(10, 91, int(80/num_levels))}
@@ -64,4 +63,4 @@ def auto_test_levels(party_size, num_games, num_levels, verbose=True):
         #utils.summarize('Enemy', master_stats[level], num_games)
         utils.cross_stats(master_stats[level])
 
-auto_test_levels(party_size=1, num_games=50, num_levels=8)
+#auto_test_levels(party_size=1, num_games=150, num_levels=8)

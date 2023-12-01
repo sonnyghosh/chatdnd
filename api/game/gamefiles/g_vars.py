@@ -3,8 +3,9 @@ from enum import Enum
 class ItemType(Enum):
     potion = 0
     magic = 1
-    weapon = 2
-    armor = 3
+    armor = 2
+    melee = 3
+    ranged = 4
 
 class PlayerStat(Enum):  
     attack = 'ATK'
@@ -48,7 +49,8 @@ stats = [PlayerStat.attack, PlayerStat.defense, PlayerStat.charisma, PlayerStat.
 choices = {
     ItemType.potion: stats[:-1],
     ItemType.magic: stats[:-4],
-    ItemType.weapon: stats[0],
+    ItemType.melee: stats[0],
+    ItemType.ranged: stats[0],
     ItemType.armor: stats[1]
 }
 
@@ -82,7 +84,7 @@ config = {
         'item': {
             'magic_weights' : [0.5, 0.2, 0.1, 0.1, 0.1],
             'potion_weights': [0.05,0.15,0.1,0.1,0.1,0.25,0.125,0.125],
-            'item_gen': [0,1,2,3,1,0,2,2,0,0,1,1,0,1,2,0,1,2]
+            'item_gen': [0,1,2,3,4,0,1,2,0,3,4,1,1,2,0,1,0,1]
         },
         'party': {
             

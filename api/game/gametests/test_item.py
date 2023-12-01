@@ -40,7 +40,8 @@ def test_generate_items():
     bag = item_lib.generate_items(10, 100)
     assert len(bag[ItemType.potion]) > 0 
     assert len(bag[ItemType.magic]) > 0
-    assert len(bag[ItemType.weapon]) > 0
+    assert len(bag[ItemType.ranged]) > 0
+    assert len(bag[ItemType.melee]) > 0
     assert len(bag[ItemType.armor]) > 0
     for item_list in bag.values():
         for item in item_list:

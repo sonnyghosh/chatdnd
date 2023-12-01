@@ -30,7 +30,8 @@ class Battle:
         assert self.player_party.validate_party() # player party memebers invalid
         assert self.enemy_party.validate_party() # enemy party memebers invalid
 
-    def pass_move(self, player, mode):
+    def pass_move(self, player, mode, st):
+        st = agg(st, {'pass':1})
         stamina_gain = int(player.attr[PlayerStat.level]/10) + random.randint(0,5)
         mana_gain = int(player.attr[PlayerStat.level]/10) + random.randint(0,5)
         health_gain = int(player.attr[PlayerStat.level]/10) + random.randint(0,5)
@@ -40,12 +41,12 @@ class Battle:
         if mode == 'player':
             clr_t()
         print(f'{player.name} has rested and gained {utils.colorize("+"+str(health_gain)+" HP", "green")}, {utils.colorize("+"+str(mana_gain)+" MP", "magenta")} and {utils.colorize("+"+str(stamina_gain)+" STA", "yellow")}.')
-        return {PlayerStat.stamina : stamina_gain, PlayerStat.health : health_gain, PlayerStat.mana: mana_gain}
+        return {PlayerStat.stamina : stamina_gain, PlayerStat.health : health_gain, PlayerStat.mana: mana_gain}, st
 
     def attack_move(self, player, mode, op_party, op_toggle, debug, auto_play, st):
-        weapon_choice = player.get_item_type(ItemType.weapon)
         # choosing a weapon from 'weapon_choice'
         if mode != 'player':
+            weapon_choice = player.get_item_type(random.choice([ItemType.ranged, ItemType.melee]))
             target = random.choice(op_party)
             if random.random() > 0.1 and len(weapon_choice) > 0:
                 if len(weapon_choice) > 1:
@@ -56,10 +57,14 @@ class Battle:
                 weapon = -1
         #prompt user to choose a weapon
         else:
+            weapon_type = prompt_user(f'Would you like to use:\n[0] Melee Weapon\n[1] Ranged Weapon\nEnter selection: ', 
+                                      invalid=lambda x: x in [ItemType.melee, ItemType.ranged],
+                                      fn=lambda x: [ItemType.melee, ItemType.ranged][int(x.strip())])
+            weapon_choice = player.get_item_type(weapon_type)
             prompt = op_toggle.get_party_members_names() + '\nWho would you like to attack? Enter the number of the character: '
             target_idx = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(op_party)), fn=lambda x: int(x))
             target = op_party[target_idx]
-            prompt = f'{player.get_item_type_str(ItemType.weapon, spacer="")}-1. Fist - use base attack stat [ {player.stats[PlayerStat.attack]} ATK ]\nPlease Select a weapon to use: '
+            prompt = f'{player.get_item_type_str(weapon_type, spacer="")}-1. Fist - use base attack stat [ {player.stats[PlayerStat.attack]} ATK ]\nPlease Select a weapon to use: '
             weapon = prompt_user(prompt=prompt, invalid=lambda x: x not in range(-1,len(weapon_choice)), fn=lambda x: int(x))
             if not debug:
                 clr_t()
@@ -96,7 +101,7 @@ class Battle:
             if len(possible) == 0:
                 print('No items to use:')
                 use_log = player.attack(target)
-                return use_log
+                return use_log, st
 
             if len(possible) > 2:
                 item = random.choices(possible, weights=[it.rank for it in possible])[0]
@@ -120,7 +125,7 @@ class Battle:
                     use_log = player.use(item) # use on self
                 else:
                     use_log = player.use(item, random.choice(cur_party)) # use on party
-            
+
             # Player chooses who to use it on
             else:
                 prompt = 'Who would you like to use it on? [S]elf, [F]riend: '
@@ -152,6 +157,7 @@ class Battle:
             # Bot randomly choses opponent
             if mode != 'player':
                 use_log = player.use(item, random.choice(op_party)) 
+
             # Player chooses who to attack
             else:
                 targets = op_toggle.get_party_members_names()
@@ -162,9 +168,10 @@ class Battle:
                     target_idx = 0
                 clr_t()
                 use_log = player.use(item, op_party[target_idx])
+
         return use_log, st
 
-    def give_move(self, player, mode, cur_party, op_party, st, action):
+    def give_move(self, player, mode, cur_party, op_party, action):
         if mode != 'player':
             target = random.choice(cur_party)
             possible = []
@@ -185,7 +192,7 @@ class Battle:
                 item = possible[0]
         else:
             #print(action)
-            action = prompt_user(f'Current Items\n 0: Potion:\n{player.get_item_ind_str(ItemType.potion)}\n 1: Magic:\n{player.get_item_ind_str(ItemType.magic)}\n 2: Weapon:\n{player.get_item_ind_str(ItemType.weapon)}\n 3: Armor:\n{player.get_item_ind_str(ItemType.armor)}\nWhich kind of item do you want to give?',
+            action = prompt_user(f'Current Items\n 0: Potion:\n{player.get_item_ind_str(ItemType.potion)}\n 1: Magic:\n{player.get_item_ind_str(ItemType.magic)}\n 2: Armor:\n{player.get_item_ind_str(ItemType.armor)}\n 3: Melee Weapon:\n{player.get_item_ind_str(ItemType.melee)}\n 4: Ranged Weapon:\n{player.get_item_ind_str(ItemType.ranged)}\nWhich kind of item do you want to give?',
                                  invalid=lambda x: x in range(0,4),
                                  fn=lambda x: ItemType(int(x)))
             spacer = '\n\t'
@@ -198,8 +205,7 @@ class Battle:
                                  fn=lambda x : int(x))
             target = cur_party.get_alive_players()[target]
         player.give(item, target)
-        st = agg(st, {'give':1})
-        return st
+        return {'give':1}
 
     def play_turn(self, mode='enemy', debug=False, auto_play=False):
         print()
@@ -256,20 +262,25 @@ class Battle:
 
             # Action - Pass: regens HP, MP, STA
             if action == 'pass' or (mode != 'player' and (player.attr[PlayerStat.mana] < player.attr[PlayerStat.level]/balance_dict['battle']['mana_thresh'] or player.attr[PlayerStat.stamina] < player.attr[PlayerStat.level]/balance_dict['battle']['stamina_thresh'])):
-                use_log = self.pass_move(player=player, mode=mode)
-                st = agg(st, {'pass':1})
+                use_log, st = self.pass_move(player=player, mode=mode, st=st)
+                assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
 
             # Action - Attack
             elif action == 'attack':
                 use_log, st = self.attack_move(player, mode, op_party, op_toggle, debug, auto_play, st)
+                assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
             
             # Action - Use an Item
             elif action.startswith('use'):
                 use_log, st = self.use_move(player, mode, op_party, op_toggle, cur_party, st, action)
+                assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
                 
             # Action - Give item to teammate
             elif action == 'give':
-                st = self.give_move(player, mode, cur_party, op_party, st, action)
+                use_log = self.give_move(player, mode, cur_party, op_party, action)
+                assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
+
+            #assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
 
             st = agg(st, use_log)
 

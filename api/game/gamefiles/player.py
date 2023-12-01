@@ -123,33 +123,36 @@ class Player:
         res += '\n\t-------------------------'
         return res
 
-    def get_dice_roll(self) -> tuple:
+    def get_dice_roll(self, ranged=False) -> tuple:
         min_roll = 0
         max_roll = 1 
         for stat in self.stats.values():
             min_roll += 0.02 * stat
             max_roll += 0.08 * stat
-        return random.randint(int(min_roll), int(max_roll))
+        
+        roll = random.randint(int(min_roll), int(max_roll))
+        misses = list(range(int(min_roll), int(min_roll+1))) if ranged else [min_roll]
+        if roll in misses:
+            return -1
+        elif roll == max_roll:
+            return -2
+        else:
+            return roll
 
     def attack(self, target: 'Player', use_armor=True):
-        return self.use_attack({PlayerStat.attack:0, PlayerStat.stamina: -random.randint(1,4)}, target, use_armor=use_armor)
+        return self.use_attack({PlayerStat.attack:0, PlayerStat.stamina: -random.randint(1,4)}, ItemType.melee, target, use_armor=use_armor)
 
-    def use_attack(self, effects, target: 'Player', use_armor=True):
+    def use_attack(self, effects, itemtype, target: 'Player', use_armor=True):
          # use item to get effects
         if effects:
+            range_weapon = True if itemtype == ItemType.ranged else False
             # get roles for players
-            attacker_role = self.get_dice_roll()
-            target_role = target.get_dice_roll()
-            
-        
+            attacker_role = self.get_dice_roll(range_weapon) # -2 - 20
+            target_role = target.get_dice_roll() # -2 - 20
+
             damage = self.stats[PlayerStat.attack] # Calculate base damage 
             damage += effects.get(PlayerStat.attack, 0)   # Add damage effects from item
-            
-            # chance for critical hit based on roll
-            if 15 < attacker_role:
-                damage *= 2
-                print("Critical hit!")
-
+            damage -= int(target.stats[PlayerStat.defense]*(target.attr[PlayerStat.level]/100)) # Reduce damage based on target's defense
             if use_armor:
                 armor = target.get_item_type(ItemType.armor)
                 if len(armor) > 0:
@@ -158,14 +161,29 @@ class Player:
                     print(f'{target.name} is using [{utils.colorize(str(block[PlayerStat.stamina])+" STA", StatColor.stamina.value)}] armor to add [{utils.colorize(str(block[PlayerStat.defense])+" DEF" , StatColor.defense.value)}]!') 
                     damage -= block[PlayerStat.defense]
                     target.attr[PlayerStat.stamina] += block[PlayerStat.stamina]
+            damage = max(5, damage)
+            # chance for critical hit based on roll
+            if attacker_role == -2:
+                damage *= 2
+                if target_role == -1:
+                    damage *= 2
+                    print(utils.colorize("Critical Hit, while off guard! 4x damage", ['bold', 'red', 'on_black']))
+                
+                elif target_role == -2:
+                    damage /= 2
+                    print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
 
-            damage -= int(target.stats[PlayerStat.defense]*(target.attr[PlayerStat.level]/100)) # Reduce damage based on target's defense 
-            damage = max(5, damage) # Make sure damage is at least 1
-            
-            # chance to dodge based on role
-            if target_role > 16:
-                damage == 0 
-                print("Attack Dodged!")
+                else:
+                    print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
+
+            elif attacker_role == -1:
+                if target == -2 and not range_weapon:
+                    self_damage = target.stats[PlayerStat.attack]//4
+                    self.attr[PlayerStat.health] -= self_damage
+                    print(f'{target.name} Revesed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health)}')
+                else:
+                    damage = 0
+                    print(utils.colorize('Attacker Epic Miss!', ['bold', 'red', 'on_black']))
 
             target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
             sta_degredation = min(0,effects.get(PlayerStat.stamina, 0))
@@ -173,7 +191,7 @@ class Player:
             if effects.get(PlayerStat.attack, 0) == 0:
                 print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)}!") # Print attack message
             else:
-                print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)} with a \033[1m\033[4mweapon\033[0m!") # Print attack message
+                print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)} with a \033[1m\033[4m{'Ranged Weapon' if range_weapon else 'Melee Weapon'}\033[0m!") # Print attack message
             return {PlayerStat.attack:damage, PlayerStat.stamina: sta_degredation}
         else:
             return self.attack(target=target)
@@ -189,16 +207,22 @@ class Player:
                 damage = self.stats[PlayerStat.attack] # Calculate base damage 
                 damage += effects.get(PlayerStat.attack, 0)   # Add damage effects from item
 
-                if 17 < attacker_role:
+                if attacker_role == -2:
                     damage *= 2
                     print("Critical hit!")
+                elif attacker_role == -1:
+                    damage //= 2
+                    print('You fialed to cast your spell')
 
                 damage -= player.stats[PlayerStat.defense] # Reduce damage based on target's defense 
                 damage = max(1, damage) # Make sure damage is at least 1
 
-                if target_role > 17:
+                if target_role == -2:
                     damage == 0
                     print("Attack Dodged!")
+                elif target_role == -1:
+                    damage *= 2
+                    print('Enemy caught off guard!')
 
                 player.attr[PlayerStat.health] = max(0, player.attr[PlayerStat.health] - damage) # Apply damage
                 self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0)) # reduce player stamina
@@ -242,12 +266,16 @@ class Player:
         effects = item.use()
         if item.type == ItemType.potion:
             self.use_item(effects, target)
+
         elif item.type == ItemType.magic:
             self.use_magic(effects, target)
-        elif item.type == ItemType.weapon:
-            return self.use_attack(effects, target, use_armor=use_armor)
+
+        elif item.type in [ItemType.melee, ItemType.ranged]:
+            return self.use_attack(effects, item.type, target, use_armor=use_armor)
+        
         if item.uses == 0 and item in self.items[item.type]:
             self.items[item.type].remove(item)
+
         return effects
 
     def give(self, item: item.Item, target: 'Player'):

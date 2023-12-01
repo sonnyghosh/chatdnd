@@ -103,8 +103,10 @@ def cross_stats(stats):
     print('weapon/move:', colorize(f'{round(en["weapon"]/en["moves"], ndigits=4)}', 'red' if en["weapon"]/en["moves"] < 0.45 else 'green'), end='\t')
     print('fist/move:', colorize(f'{round(en["fist"]/en["moves"], ndigits=4)}\n', 'red' if en["fist"]/en["moves"] > 0.1 else 'green'))
 
-    print(colorize('Player W/L:', 'white'), colorize(f'{pl["Wins"]/(pl["Losses"] + pl["Wins"])}', 'green' if 0.6 > pl["Wins"]/(pl["Losses"] + pl["Wins"]) > 0.4 else 'red'))
-    print(colorize('Enemy W/L:', 'white'), colorize(f'{en["Wins"]/(en["Losses"] + en["Wins"])}', 'green' if 0.6 > en["Wins"]/(en["Losses"] + en["Wins"]) > 0.4 else 'red'))
+    print('Avg Player Turns: ', pl['turns']/(pl['Wins'] + en['Wins']))
+    print('Avg Player Moves: ', pl['moves']/(pl['Wins'] + en['Wins']))
+    print(colorize('Player W/L:', 'white'), colorize(f'{round(pl["Wins"]/(pl["Losses"] + pl["Wins"]), ndigits=2)}', 'green' if 0.6 > pl["Wins"]/(pl["Losses"] + pl["Wins"]) > 0.4 else 'red'))
+    print(colorize('Enemy W/L:', 'white'), colorize(f'{round(en["Wins"]/(en["Losses"] + en["Wins"]), ndigits=2)}', 'green' if 0.6 > en["Wins"]/(en["Losses"] + en["Wins"]) > 0.4 else 'red'))
     print('Player HP - Enemy ATK:', colorize(f'{pl[PlayerStat.health] - en[PlayerStat.attack]}', 'red' if pl[PlayerStat.health] - en[PlayerStat.attack] > 0 else 'green'))
     print('Enemy HP - Player ATK:', colorize(f'{en[PlayerStat.health] - pl[PlayerStat.attack]}', 'red' if en[PlayerStat.health] - pl[PlayerStat.attack] > 0 else 'green'))
-    print('power level ratio:', colorize(f'{pl["power"]/en["power"]}', 'green' if 1.2 > pl["power"]/en["power"] > 0.8 else 'red'))
+    print('power level ratio:', colorize(f'{round(pl["power"]/en["power"], ndigits=2)}', 'green' if 1.2 > pl["power"]/en["power"] > 0.8 else 'red'))
