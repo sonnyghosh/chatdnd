@@ -32,6 +32,9 @@ class Party:
     def get_alive_players(self):
         return [p for p in self.players if p.attr[PlayerStat.health] > 0]
     
+    def get_power_level(self):
+        return sum([pl.get_rank() for pl in self.players])
+
     def get_party_members_names(self):
         res = f'{self.name}\n'
         for idx, pl in enumerate(self.get_alive_players()):

@@ -1,7 +1,8 @@
 import random
 from . import g_vars, item
 PlayerStat = g_vars.PlayerStat
-
+ItemType = g_vars.ItemType
+balance_dict = g_vars.config['balance']
 class Item:
     """
     Represents an item in a video game.
@@ -36,7 +37,7 @@ class Item:
         new_rank = 0
         if self.uses != 0:
             new_rank = sum([val for val in self.effects.values()]) * (self.uses if self.uses > 1 else 2)
-            if self.type == 0:
+            if self.type == ItemType.potion:
                 new_rank //= 2
         self.rank = new_rank
         return new_rank
@@ -92,46 +93,44 @@ class Item:
 
 def generate_items(n_items, level):
     bag = {
-        g_vars.ItemType.potion:[],   # potions
-        g_vars.ItemType.magic:[],   # magic
-        g_vars.ItemType.weapon:[],   # weapon
-        g_vars.ItemType.armor:[]    # armor
+        ItemType.potion:[],   # potions
+        ItemType.magic:[],   # magic
+        ItemType.weapon:[],   # weapon
+        ItemType.armor:[]    # armor
     }
-    item_gen = [0,1,2,3,1,0,2,2,0,0,1,1,0,1,2,0,1,2] # order for items to be generated
-    potion_weight = [0.05,0.15,0.1,0.1,0.1,0.25,0.125,0.125]
-    magic_weight = [0.4,0.3,0.1,0.1,0.1]
+
     for i in range(n_items):
-        ind = item_gen[i]
+        ind = ItemType(balance_dict['item']['item_gen'][i])
         # generate potion
-        if ind == 0:
-            item_name = g_vars.ItemType(ind)
+        if ind == ItemType.potion:
+            item_name = ind
             item_uses = random.randint(int(level/10),int(level/4))
             effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/4))))
-            effect_type = random.choices(g_vars.choices[item_name], weights=potion_weight)[0]
+            effect_type = random.choices(g_vars.choices[item_name], weights=balance_dict['item']['potion_weights'])[0]
             item_effects = {effect_type: effect_bonus}
         
         # generate magic
-        elif ind == 1:
-            item_name = g_vars.ItemType(ind)
+        elif ind == ItemType.magic:
+            item_name = ind
             item_uses = -99#random.randint(int(level/5),int(level/2))
             effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/3))))
-            side_effect = int(-effect_bonus * (random.random()*0.5+0.5))
-            item_effects = {random.choices(g_vars.choices[item_name], weights=magic_weight)[0]: effect_bonus,PlayerStat.mana: side_effect}
+            side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
+            item_effects = {random.choices(g_vars.choices[item_name], weights=balance_dict['item']['magic_weights'])[0]: effect_bonus, PlayerStat.mana: side_effect}
 
         # generate weapon
-        elif ind == 2:
-            item_name = g_vars.ItemType(ind)
+        elif ind == ItemType.weapon:
+            item_name = ind
             item_uses = random.randint(int(level/5),int(level/4))
             effect_bonus = max(2,min(30,random.randint(int(level/5),int(level/2.5))))
-            side_effect = int(-effect_bonus * (random.random()*0.5+0.5))
+            side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
             item_effects = {PlayerStat.attack: effect_bonus,PlayerStat.stamina: side_effect}
         
         # generate armor
-        elif ind == 3:
-            item_name = g_vars.ItemType(ind)
+        elif ind == ItemType.armor:
+            item_name = ind
             item_uses = 100
             effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/5))))
-            side_effect = int(-effect_bonus * (random.random()*0.2) -1)
+            side_effect = int(-effect_bonus * (random.random()*0.2) - 1)
             item_effects = {PlayerStat.defense: effect_bonus, PlayerStat.stamina: side_effect}
 
         bag[g_vars.ItemType(ind)].append(item.Item(item_name, item_uses, item_effects))

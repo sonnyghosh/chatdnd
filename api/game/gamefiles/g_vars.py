@@ -33,7 +33,7 @@ class PlayerStat(Enum):
 
 class StatColor(Enum):
     attack = ['bold', 'bright_red', 'on_black']
-    defense = ['bold', 'bright_green', 'on_black']
+    defense = ['bold', 'bright_blue', 'on_black']
     charisma = ['bold','bright_blue', 'on_white']
     intelligence = ['bold','bright_green', 'on_white']
     wisdom = ['bold','bright_magenta', 'on_white']
@@ -67,7 +67,26 @@ config = {
     },
     "player": {
         "avg_level": 50,
-        "avg_sd": 10
+        "avg_sd": 10,
+        
+    },
+    'balance': {
+        'battle': {
+            'mana_thresh': 2,
+            'stamina_thresh': 2
+        },
+        'player': {
+            "possible_actions" : ['attack', 'use', 'pass', 'give'],
+            "action_weight": [0.6, 0.3, 0.05, 0.05]
+        },
+        'item': {
+            'magic_weights' : [0.5, 0.2, 0.1, 0.1, 0.1],
+            'potion_weights': [0.05,0.15,0.1,0.1,0.1,0.25,0.125,0.125],
+            'item_gen': [0,1,2,3,1,0,2,2,0,0,1,1,0,1,2,0,1,2]
+        },
+        'party': {
+            
+        }
     }
 }
 

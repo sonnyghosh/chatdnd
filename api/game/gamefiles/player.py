@@ -155,6 +155,7 @@ class Player:
                 if len(armor) > 0:
                     armor = armor[0]
                     block = armor.use()
+                    print(f'{target.name} is using [{utils.colorize(str(block[PlayerStat.stamina])+" STA", StatColor.stamina.value)}] armor to add [{utils.colorize(str(block[PlayerStat.defense])+" DEF" , StatColor.defense.value)}]!') 
                     damage -= block[PlayerStat.defense]
                     target.attr[PlayerStat.stamina] += block[PlayerStat.stamina]
 
@@ -167,7 +168,7 @@ class Player:
                 print("Attack Dodged!")
 
             target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
-            sta_degredation = max(0,effects.get(PlayerStat.stamina, 0) - random.randint(1,4))
+            sta_degredation = min(0,effects.get(PlayerStat.stamina, 0))
             self.attr[PlayerStat.stamina] += sta_degredation # reduce player stamina
             if effects.get(PlayerStat.attack, 0) == 0:
                 print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)}!") # Print attack message
@@ -201,7 +202,7 @@ class Player:
 
                 player.attr[PlayerStat.health] = max(0, player.attr[PlayerStat.health] - damage) # Apply damage
                 self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0)) # reduce player stamina
-                print(f"{self.name} used {utils.colorize(self.attr[PlayerStat.mana], StatColor.mana.value)} cast magic on {player.name} for {utils.colorize(damage, StatColor.attack.value)} damage!")
+                print(f"{self.name} [{utils.colorize(self.attr[PlayerStat.mana], StatColor.mana.value)}] used {utils.colorize(effects[PlayerStat.mana], StatColor.mana.value)} cast magic on {player.name} for {utils.colorize(damage, StatColor.attack.value)} damage!")
 
             else:
                 buff = list(effects.keys())
@@ -245,7 +246,6 @@ class Player:
             self.use_magic(effects, target)
         elif item.type == ItemType.weapon:
             return self.use_attack(effects, target, use_armor=use_armor)
-        
         if item.uses == 0 and item in self.items[item.type]:
             self.items[item.type].remove(item)
         return effects
@@ -254,6 +254,7 @@ class Player:
         temp = item
         self.items[item.type].remove(item)
         target.items[item.type].append(temp)
+        print(f'{self.name} gave {target.name} - {utils.colorize(item.type.name, ["bold", "cyan", "on_black"])}')
 
     def sort_inv(self):
         for item_list in self.items.values():
