@@ -56,10 +56,10 @@ class Player:
         self.get_rank()
     
     def get_rank(self):
-        stat_rank = sum(self.stats.values())
-        items_rank = sum([sum([i.rank for i in it]) for it in self.items.values()])
+        stat_rank = sum(self.stats.values())/len(self.stats.values())
+        items_rank = sum([sum([i.rank for i in it])/len(it) for it in self.items.values()])/len(self.items)
         attr_rank = sum([att for key, att in self.attr.items() if key != 'name'])
-        self.rank = stat_rank + items_rank + attr_rank
+        self.rank = (stat_rank + items_rank) * attr_rank
         return stat_rank + items_rank + attr_rank
 
     def validate_player(self):
