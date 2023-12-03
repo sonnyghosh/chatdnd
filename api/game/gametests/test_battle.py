@@ -43,7 +43,7 @@ def test_auto_turn(basic_battle):
     assert stats.get(PlayerStat.attack, 0) >= 0
 
 def test_enemy_turn(basic_battle):
-    stats = basic_battle.play_turn(mode='enemy', debug=True)
+    stats = basic_battle.play_turn(mode='enemy', debug=True, auto_play=True)
     assert stats
     assert stats.get(PlayerStat.attack, 0) >= 0
    

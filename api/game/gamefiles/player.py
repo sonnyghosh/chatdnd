@@ -58,9 +58,9 @@ class Player:
     def get_rank(self):
         stat_rank = sum(self.stats.values())/len(self.stats.values())
         items_rank = sum([sum([i.rank for i in it])/len(it) for it in self.items.values()])/len(self.items)
-        attr_rank = sum([att for key, att in self.attr.items() if key != 'name'])
-        self.rank = (stat_rank + items_rank) * attr_rank
-        return stat_rank + items_rank + attr_rank
+        attr_rank = sum([att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)
+        self.rank = int((stat_rank + items_rank) * attr_rank)
+        return self.rank
 
     def validate_player(self):
         # Validate stats
@@ -91,12 +91,16 @@ class Player:
             res += f'\n\t{item_names[typ]}:{spacer}{"".join([str(x) + spacer for x in lst if x.uses != 0])}'
         return res
 
-    def get_item_type_str(self, itemtype, prefix='', spacer='\t'):
-        res = f'{itemtype.name}\n'
-        res += prefix
+    def get_item_type_str(self, itemtype, prefix='', spacer='\t', numbered=False):
+        if prefix != '':
+            prefix += ') '
+        res = f'{prefix}{itemtype.name}\n'
         for idx, itm in enumerate(self.get_item_type(itemtype=itemtype)):
             res += spacer
-            res += f'{idx}. {itm}\n'
+            if numbered:
+                res += f'{idx}. {itm}\n'
+            else:
+                res += f'{itm}\n'
         return res
 
     def get_item_type(self, itemtype):
@@ -109,17 +113,17 @@ class Player:
         # print all of the player stats
         res += '\tStats:'
         for st, val in self.stats.items():
-            res += f'| {st} - {val} '
+            res += f'| {st.name} - {val} '
         res += '|'
         # print out the attributes of th player
         res += '\n\tAttributes:'
         for st, val in self.attr.items():
-            res += f'| {st} - {val} '
+            res += f'| {st.name if type(st) is PlayerStat else st} - {val} '
         res += '|'
         #print out player items
-        res += '\n\tItems:'
-        res += self.get_item_type_str(ItemType.potion)
-        res += self.get_item_type_str(ItemType.magic)
+        res += '\n\tItems:\n'
+        res += self.get_item_type_str(ItemType.potion, prefix='0:', numbered=False)
+        res += self.get_item_type_str(ItemType.magic, prefix='1:', numbered=False)
         res += '\n\t-------------------------'
         return res
 
@@ -282,6 +286,7 @@ class Player:
         temp = item
         self.items[item.type].remove(item)
         target.items[item.type].append(temp)
+        target.sort_inv()
         print(f'{self.name} gave {target.name} - {utils.colorize(item.type.name, ["bold", "cyan", "on_black"])}')
 
     def sort_inv(self):

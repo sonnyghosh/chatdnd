@@ -58,21 +58,26 @@ class Battle:
         #prompt user to choose a weapon
         else:
             weapon_type = prompt_user(f'Would you like to use:\n[0] Melee Weapon\n[1] Ranged Weapon\nEnter selection: ', 
-                                      invalid=lambda x: x in [ItemType.melee, ItemType.ranged],
-                                      fn=lambda x: [ItemType.melee, ItemType.ranged][int(x.strip())])
+                                      invalid=lambda x: x not in [ItemType.melee, ItemType.ranged],
+                                      fn=lambda x: [ItemType.melee, ItemType.ranged][int(x)])
             weapon_choice = player.get_item_type(weapon_type)
-            prompt = op_toggle.get_party_members_names() + '\nWho would you like to attack? Enter the number of the character: '
-            target_idx = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(op_party)), fn=lambda x: int(x))
-            target = op_party[target_idx]
-            prompt = f'{player.get_item_type_str(weapon_type, spacer="")}-1. Fist - use base attack stat [ {player.stats[PlayerStat.attack]} ATK ]\nPlease Select a weapon to use: '
+
+            prompt = f'{player.get_item_type_str(weapon_type, spacer="", numbered=True)}-1. Fist - use base attack stat [ {player.stats[PlayerStat.attack]} ATK ]\nPlease Select a weapon to use: '
             weapon = prompt_user(prompt=prompt, invalid=lambda x: x not in range(-1,len(weapon_choice)), fn=lambda x: int(x))
+            
+            if len(op_party) > 1:
+                prompt = op_toggle.get_party_members_names() + '\nWho would you like to attack? Enter the number of the character: '
+                target_idx = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(op_party)), fn=lambda x: int(x))
+                target = op_party[target_idx]
+            else:
+                target = op_party[0]
             if not debug:
                 clr_t()
         use_armor=True
         # Player decide to use armor 
         if mode == 'enemy':
             if not auto_play:
-                ans = prompt_user(f'{target.name} is being attacked... Use armor for extra DEF? [Y]/[N]', invalid=lambda x: x in ['Y','N'], fn=lambda x: str.upper(x.split()[0]))
+                ans = prompt_user(f'{target.name} is being attacked... Use armor for extra DEF? [Y]/[N]: ', invalid=lambda x: x not in ['Y','N'], fn=lambda x: str.upper(x.split()[0]))
                 use_armor = True if ans == 'Y' else False
 
         # Use weapon attack
@@ -111,8 +116,9 @@ class Battle:
         else:
             #print(action)
             spacer = '\n\t'
-            item_list = player.items[ItemType(int(action.split()[1]))] 
-            prompt = f'{player.name}\'s Current Items:{spacer}{"".join([str(i)+". "+str(x)+ spacer for i, x in enumerate(item_list)])}\nPlease enter the item that you want to use: '
+            item_type = ItemType(int(action.split()[1]))
+            item_list = player.items[item_type] 
+            prompt = f'{player.name}\'s Current Items:{spacer}{player.get_item_type_str(item_type, numbered=True)}\nPlease enter the item that you want to use: '
             item_ind = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(item_list)), fn=lambda x: int(x))
             item = item_list[item_ind]
 
@@ -161,7 +167,7 @@ class Battle:
             # Player chooses who to attack
             else:
                 targets = op_toggle.get_party_members_names()
-                prompt = f'{targets}\nWho would you like to use {item.name} on? Enter the number of the character: '
+                prompt = f'{targets}\nWho would you like to use {item.type.name} on? Enter the number of the character: '
                 if len(targets) > 1:
                     target_idx = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(op_party)), fn=lambda x: int(x))                       
                 else:
@@ -171,7 +177,7 @@ class Battle:
 
         return use_log, st
 
-    def give_move(self, player, mode, cur_party, op_party, action):
+    def give_move(self, player, mode, cur_party, toggle, op_party, action):
         if mode != 'player':
             target = random.choice(cur_party)
             possible = []
@@ -192,18 +198,19 @@ class Battle:
                 item = possible[0]
         else:
             #print(action)
-            action = prompt_user(f'Current Items\n 0: Potion:\n{player.get_item_ind_str(ItemType.potion)}\n 1: Magic:\n{player.get_item_ind_str(ItemType.magic)}\n 2: Armor:\n{player.get_item_ind_str(ItemType.armor)}\n 3: Melee Weapon:\n{player.get_item_ind_str(ItemType.melee)}\n 4: Ranged Weapon:\n{player.get_item_ind_str(ItemType.ranged)}\nWhich kind of item do you want to give?',
-                                 invalid=lambda x: x in range(0,4),
+            action = prompt_user(f'Current Items\n 0: Potion:\n{player.get_item_type_str(ItemType.potion)}\n 1: Magic:\n{player.get_item_type_str(ItemType.magic)}\n 2: Armor:\n{player.get_item_type_str(ItemType.armor)}\n 3: Melee Weapon:\n{player.get_item_type_str(ItemType.melee)}\n 4: Ranged Weapon:\n{player.get_item_type_str(ItemType.ranged)}\nWhich kind of item do you want to give?',
+                                 invalid=lambda x: type(x) is not ItemType,
                                  fn=lambda x: ItemType(int(x)))
             spacer = '\n\t'
             item_list = player.get_item_type(action)
             prompt = f'{player.name}\'s Current Items:{spacer}{"".join([str(i)+". "+str(x)+ spacer for i, x in enumerate(item_list)])}\nPlease enter the item that you want to give: '
             item_ind = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(item_list)), fn=lambda x: int(x))
             item = item_list[item_ind]
-            target = prompt_user(prompt=f'{cur_party.get_party_members_names()}\nEnter the number of the character to give the {item.name} to: ',
-                                 invalid=lambda x: x not in range(len(cur_party.get_alive_players())),
+            party_members = toggle.get_alive_players()
+            target = prompt_user(prompt=f'{toggle.get_party_members_names()}\nEnter the number of the character to give the {item.type.name} to: ',
+                                 invalid=lambda x: x not in range(len(party_members)),
                                  fn=lambda x : int(x))
-            target = cur_party.get_alive_players()[target]
+            target = party_members[target]
         player.give(item, target)
         return {'give':1}
 
@@ -252,8 +259,13 @@ class Battle:
                 print(op_toggle.get_party_members_names())
                 print(toggle.get_party_members_names())
                 # prompt user to make a move
-                prompt = f'{player.name}\'s turn!\nHere is {player.name}\'s redout:\n{player}\n - To attack type "attack"\n - To use an item type "use (Item type #)"\n - To regen HP, MP, and STA type "pass"\n - To give an item to a party member type "give"\nAction: '
-                action = prompt_user(prompt=prompt, invalid=lambda x: x not in ['attack', 'pass'] and len(x.split()) < 2)
+                if len(cur_party) < 2:
+                    addon = ''
+                else:
+                    addon = '\n - To give an item to a party member type "give"'
+
+                prompt = f'{player.name}\'s turn!\nHere is {player.name}\'s redout:\n{player}\n - To attack type "attack"\n - To use an item type "use (Item type #)"\n - To regen HP, MP, and STA type "pass"{addon}\nAction: '
+                action = prompt_user(prompt=prompt, invalid=lambda x: x not in balance_dict['player']['possible_actions'] and len(x.split()) < 2)
             
             # random action for bot
             else:
@@ -277,7 +289,7 @@ class Battle:
                 
             # Action - Give item to teammate
             elif action == 'give':
-                use_log = self.give_move(player, mode, cur_party, op_party, action)
+                use_log = self.give_move(player, mode, cur_party, toggle, op_party, action)
                 assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
 
             #assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
@@ -287,9 +299,6 @@ class Battle:
         return st
 
     def combat_round(self, debug=False, auto_play=False):
-        if not debug:
-            print(self.player_party.get_party_members_names())
-            print(self.enemy_party.get_party_members_names())
         # Player turn
         if auto_play:
             p_stats = self.play_turn(mode='auto', debug=debug, auto_play=auto_play)
