@@ -26,6 +26,11 @@ player_hypers = {
     PlayerStat.level : 0.1,
 }
 
+meta_params = {
+        "use_scale": 0.2
+    }
+
+
 def convert_keys(dc):
     if type(list(dc.keys())[0]) in [ItemType, PlayerStat]:
         dc = {key.value: val for key, val in dc.items()}
@@ -33,12 +38,13 @@ def convert_keys(dc):
         dc = {PlayerStat(key) if list(dc.keys())[0] in [e.value for e in PlayerStat] else ItemType(int(key)): val for key, val in dc.items()}
     return dc
 
-def save_hypers(item_hypers, player_hypers):
+def save_hypers(item_hypers, player_hypers, meta_params):
     item_hypers = convert_keys(item_hypers)
     player_hypers = convert_keys(player_hypers)
     data = {
         'item_hypers': item_hypers,
-        'player_hypers': player_hypers
+        'player_hypers': player_hypers,
+        'meta': meta_params
     }
     with open(HYPERS_FILE, 'w') as f: 
         json.dump(data, f)
@@ -55,5 +61,5 @@ def load_hypers():
 def randomize(hyper_params):
     hyper_param = hyper_params.copy()
     for key, val in hyper_param.items():
-        hyper_param[key] = min(1, max(0, round(random.normalvariate(0, 0.1) + val, ndigits=2)))
+        hyper_param[key] = round(random.uniform(0.01, 1), ndigits=2)
     return hyper_param

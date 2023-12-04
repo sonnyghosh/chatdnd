@@ -30,15 +30,18 @@ class Party:
         return len(self.players)
 
     def get_alive_players(self):
-        return [p for p in self.players if p.attr[PlayerStat.health] > 0]
+        res = [p for p in self.players if p.attr[PlayerStat.health] > 0]
+        res.sort(key=lambda x: x.get_rank())
+        return res
     
     def get_power_level(self):
-        return sum([pl.get_rank() for pl in self.players])
+        cur_pt = self.get_alive_players()
+        return max(0.01,sum([pl.get_rank() for pl in cur_pt]))
 
     def get_party_members_names(self):
         res = f'{self.name}\n'
         for idx, pl in enumerate(self.get_alive_players()):
-            res += f'{idx}: {pl.name} - \t'
+            res += f'{idx}: {pl.name} - {pl.get_rank()}\t'
             res += f'|{"".join([utils.colorize(f"{key.name}: {val} |", key.color().value) for key, val in pl.attr.items() if key != "name"])}'
             res += f'\t|{"".join([utils.colorize(f"{key.name}: {val} |", key.color().value) for key, val in pl.stats.items()])}\n'
         return res

@@ -1,5 +1,5 @@
 import random
-from . import party, g_vars, hypers
+from . import party, g_vars, hypers, AI
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor
@@ -53,10 +53,10 @@ class Battle:
             ranged_possible = player.get_item_type(ItemType.ranged)
             melee_possible = player.get_item_type(ItemType.melee)
             weapon_choice = ranged_possible if len(ranged_possible) > len(melee_possible) else melee_possible
-            target = random.choice(op_party) # TODO: make a decision on which enemey is the best to attack
+            target = op_party[-1]#random.choices(op_party, weights=[1/p.stats[PlayerStat.defense] for p in op_party])[0] # TODO: make a decision on which enemey is the best to attack
             if random.random() > 0.1 and len(weapon_choice) > 0:
                 if len(weapon_choice) > 1:
-                    weapon = random.choices([i for i in range(len(weapon_choice))], weights=[a.rank for a in weapon_choice])[0] # TODO: make a selection mechanism for items
+                    weapon = 0 #random.choices([i for i in range(len(weapon_choice))], weights=[a.rank for a in weapon_choice])[0] # TODO: make a selection mechanism for items
                 else:
                     weapon = 0
             else:
@@ -281,7 +281,8 @@ class Battle:
             # random action for bot
             else:
                 if mode == 'ai':
-                    Ai.make_move(state)
+                    state = {'player': player, 'Enemies': op_party, 'friends': cur_party}
+                    AI.make_move(state)
                 else:
                     action = random.choices(balance_dict['player']['possible_actions'], weights=balance_dict['player']['action_weight'])[0]
                 

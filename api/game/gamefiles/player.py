@@ -58,10 +58,13 @@ class Player:
         self.get_rank()
     
     def get_rank(self):
-        stat_rank = sum([player_hypers[key] * val for key, val in self.stats.items()])/len(self.stats.values())
-        items_rank = sum([sum([i.rank for i in it])/len(it) for it in self.items.values()])/len(self.items)
-        attr_rank = sum([player_hypers[key] * att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)
-        self.rank = int((stat_rank + items_rank) * attr_rank)
+        if self.attr[PlayerStat.health] > 0:
+            stat_rank = sum([player_hypers[key] * val for key, val in self.stats.items()])/max(1,len(self.stats.values()))
+            items_rank = sum([sum([i.rank for i in it])/max(1,len(it)) for it in self.items.values()])/max(1,len(self.items))
+            attr_rank = sum([player_hypers[key] * att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)
+            self.rank = float((stat_rank + items_rank) * attr_rank)
+        else:
+            self.rank = 0
         return self.rank
 
     def validate_player(self):

@@ -17,8 +17,8 @@ def test_game(party_size, level, generate_party):
     level_avg = level
     level_sd = 4
     if generate_party:
-        player_party = party.generate_party(party_size, 'Dike Tyson\'s Squad', avg_level=level_avg, level_sd=level_sd)
-        enemy_party = party.generate_party(party_size, 'Enemy Squad', avg_level=level_avg, level_sd=level_sd)
+        player_party = party.generate_party(party_size if type(party_size) is int else party_size[0], 'Dike Tyson\'s Squad', avg_level=level_avg if type(level_avg) is int else level_avg[0], level_sd=level_sd)
+        enemy_party = party.generate_party(party_size if type(party_size) is int else party_size[1], 'Enemy Squad', avg_level=level_avg if type(level_avg) is int else level_avg[1], level_sd=level_sd)
     else:
         player_party = test_character.Dike_Tyson_Party
         enemy_party = test_character.Enemy_Test_Party
