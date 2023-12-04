@@ -1,8 +1,10 @@
 import random
-from . import g_vars, item
+from . import g_vars, item, hypers
 PlayerStat = g_vars.PlayerStat
 ItemType = g_vars.ItemType
 balance_dict = g_vars.config['balance']
+item_hypers, player_hypers = hypers.load_hypers()
+
 class Item:
     """
     Represents an item in a video game.
@@ -36,14 +38,12 @@ class Item:
     def get_rank(self):
         new_rank = 0
         if self.uses != 0:
-            new_rank = sum([val for val in self.effects.values()]) * (self.uses if self.uses > 1 else 2)
-            if self.type == ItemType.potion:
-                new_rank //= 2
-        self.rank = new_rank
-        return new_rank
+            new_rank = sum([(item_hypers.get(key, 0) + player_hypers.get(key,0)) * val for key, val in self.effects.items()]) * min(10, abs(self.uses))
+        self.rank = max(0.1, new_rank)
+        return self.rank
 
     def __str__(self) -> str:
-        return f'{self.type.name} - Rank: {self.rank}, Uses: {self.uses if self.uses != -99 else self.inf_char}, Effects [ {"".join([f"{key.value}: {val} " for key, val in self.effects.items()])}]'
+        return f'{self.type.name} - Rank: {int(self.rank)}, Uses: {self.uses if self.uses != -99 else self.inf_char}, Effects [ {"".join([f"{key.value}: {val} " for key, val in self.effects.items()])}]'
 
     def validate_effects(self):
         """

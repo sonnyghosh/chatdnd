@@ -1,5 +1,5 @@
 import random
-from . import party, g_vars
+from . import party, g_vars, hypers
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor
@@ -7,6 +7,9 @@ import os
 import time
 from game.gametests import utils
 balance_dict = g_vars.config['balance']
+item_hypers, player_hypers = hypers.load_hypers()
+
+verbose = g_vars.config['meta']['verbose']
 
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -40,17 +43,20 @@ class Battle:
         player.attr[PlayerStat.health] = min(100, player.attr[PlayerStat.health] + health_gain)
         if mode == 'player':
             clr_t()
-        print(f'{player.name} has rested and gained {utils.colorize("+"+str(health_gain)+" HP", "green")}, {utils.colorize("+"+str(mana_gain)+" MP", "magenta")} and {utils.colorize("+"+str(stamina_gain)+" STA", "yellow")}.')
+        if verbose:
+            print(f'{player.name} has rested and gained {utils.colorize("+"+str(health_gain)+" HP", "green")}, {utils.colorize("+"+str(mana_gain)+" MP", "magenta")} and {utils.colorize("+"+str(stamina_gain)+" STA", "yellow")}.')
         return {PlayerStat.stamina : stamina_gain, PlayerStat.health : health_gain, PlayerStat.mana: mana_gain}, st
 
     def attack_move(self, player, mode, op_party, op_toggle, debug, auto_play, st):
         # choosing a weapon from 'weapon_choice'
         if mode != 'player':
-            weapon_choice = player.get_item_type(random.choice([ItemType.ranged, ItemType.melee]))
+            ranged_possible = player.get_item_type(ItemType.ranged)
+            melee_possible = player.get_item_type(ItemType.melee)
+            weapon_choice = ranged_possible if len(ranged_possible) > len(melee_possible) else melee_possible
             target = random.choice(op_party)
             if random.random() > 0.1 and len(weapon_choice) > 0:
                 if len(weapon_choice) > 1:
-                    weapon = random.choices([0,1],weights=[0.8,0.2])[0]
+                    weapon = random.choices([i for i in range(len(weapon_choice))], weights=[a.rank for a in weapon_choice])[0]
                 else:
                     weapon = 0
             else:
@@ -104,7 +110,8 @@ class Battle:
                 if tries > 20: break
 
             if len(possible) == 0:
-                print('No items to use:')
+                if verbose:
+                    print('No items to use:')
                 use_log = player.attack(target)
                 return use_log, st
 
@@ -188,7 +195,8 @@ class Battle:
                 if tries > 20: break
 
             if len(possible) == 0:
-                print('No items to give:')
+                if verbose:
+                    print('No items to give:')
                 use_log = player.attack(random.choice(op_party))
                 return use_log
 
@@ -215,13 +223,14 @@ class Battle:
         return {'give':1}
 
     def play_turn(self, mode='enemy', debug=False, auto_play=False):
-        print()
-        if debug:
-            print('Debug mode:', debug)
-        if auto_play or mode == 'enemy':
-            print(f'{mode} turn:')
-        if mode not in ['enemy', 'auto', 'player']:
-            print(f'Not a valit mode: [{mode}]')
+        if verbose:
+            print()
+            if debug:
+                print('Debug mode:', debug)
+            if auto_play or mode == 'enemy':
+                print(f'{mode} turn:')
+            if mode not in ['enemy', 'auto', 'player']:
+                print(f'Not a valit mode: [{mode}]')
 
         toggle = self.enemy_party if mode == 'enemy' else self.player_party
         op_toggle = self.player_party if mode == 'enemy' else self.enemy_party
@@ -250,7 +259,8 @@ class Battle:
 
             # print out all of the players that are still alive
             if debug and mode=='player':
-                print(utils.colorize('Using Default Attack', 'red'))
+                if verbose:
+                    print(utils.colorize('Using Default Attack', 'red'))
                 use_log = player.attack(random.choice(op_party))
                 break
 
@@ -269,8 +279,13 @@ class Battle:
             
             # random action for bot
             else:
-                action = random.choices(balance_dict['player']['possible_actions'], weights=balance_dict['player']['action_weight'])[0]
-                print(utils.colorize(f'{toggle.name}', 'red' if mode == 'enemy' else 'cyan'), utils.colorize(f'Team making action:', 'green'), utils.colorize(f'{action}', ['bold', 'on_cyan'] if action == 'use' else ['bold', 'on_green'] if action == 'pass' else ['bold', 'on_yellow'] if action == 'give' else ['bold', 'on_red']))
+                if mode == 'ai':
+                    Ai.make_move(state)
+                else:
+                    action = random.choices(balance_dict['player']['possible_actions'], weights=balance_dict['player']['action_weight'])[0]
+                
+                if verbose:
+                    print(utils.colorize(f'{toggle.name}', 'red' if mode == 'enemy' else 'cyan'), utils.colorize(f'Team making action:', 'green'), utils.colorize(f'{action}', ['bold', 'on_cyan'] if action == 'use' else ['bold', 'on_green'] if action == 'pass' else ['bold', 'on_yellow'] if action == 'give' else ['bold', 'on_red']))
 
             # Action - Pass: regens HP, MP, STA
             if action == 'pass' or (mode != 'player' and (player.attr[PlayerStat.mana] < player.attr[PlayerStat.level]/balance_dict['battle']['mana_thresh'] or player.attr[PlayerStat.stamina] < player.attr[PlayerStat.level]/balance_dict['battle']['stamina_thresh'])):
@@ -302,6 +317,7 @@ class Battle:
         # Player turn
         if auto_play:
             p_stats = self.play_turn(mode='auto', debug=debug, auto_play=auto_play)
+            p_stats['score'] = sum([])
         else:
             p_stats = self.play_turn(mode='player')
         p_stats['moves'] = p_stats.get('moves',0) + len(self.player_party.get_alive_players())
@@ -331,16 +347,19 @@ class Battle:
         p_stats = agg(p_stats, {'Wins': 1} if self.player_party.get_alive_players() else {'Losses': 1})
         e_stats = agg(e_stats, {'Wins': 1} if self.enemy_party.get_alive_players() else {'Losses': 1})
         
-        if not (debug or auto_play):
-            clr_t()
-            print("Combat over!")
-            if len(self.player_party.get_alive_players()) > 0:
-                print('You won, Congratulations!')
-            else:
-                print('You Lose, Weep in pain!')
+        if verbose:
+            if not (debug or auto_play):
+                clr_t()
+                print("Combat over!")
+                if len(self.player_party.get_alive_players()) > 0:
+                    print('You won, Congratulations!')
+                else:
+                    print('You Lose, Weep in pain!')
+
         if not auto_play:
             return {'Player':p_stats, 'Enemy': e_stats}
         else:
-            print('Game Over')
+            if verbose:
+                print('Game Over')
             return p_stats, e_stats
         

@@ -1,10 +1,12 @@
 import random
-from . import item, g_vars
+from . import item, g_vars, hypers
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor
 config = g_vars.config
+item_hypers, player_hypers = hypers.load_hypers()
 from game.gametests import utils
+verbose = g_vars.config['meta']['verbose']
 """
 Item Documentation:
     Represents an item in a video game.
@@ -56,9 +58,9 @@ class Player:
         self.get_rank()
     
     def get_rank(self):
-        stat_rank = sum(self.stats.values())/len(self.stats.values())
+        stat_rank = sum([player_hypers[key] * val for key, val in self.stats.items()])/len(self.stats.values())
         items_rank = sum([sum([i.rank for i in it])/len(it) for it in self.items.values()])/len(self.items)
-        attr_rank = sum([att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)
+        attr_rank = sum([player_hypers[key] * att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)
         self.rank = int((stat_rank + items_rank) * attr_rank)
         return self.rank
 
@@ -162,7 +164,8 @@ class Player:
                 if len(armor) > 0:
                     armor = armor[0]
                     block = armor.use()
-                    print(f'{target.name} is using [{utils.colorize(str(block[PlayerStat.stamina])+" STA", StatColor.stamina.value)}] armor to add [{utils.colorize(str(block[PlayerStat.defense])+" DEF" , StatColor.defense.value)}]!') 
+                    if verbose:
+                        print(f'{target.name} is using [{utils.colorize(str(block[PlayerStat.stamina])+" STA", StatColor.stamina.value)}] armor to add [{utils.colorize(str(block[PlayerStat.defense])+" DEF" , StatColor.defense.value)}]!') 
                     damage -= block[PlayerStat.defense]
                     target.attr[PlayerStat.stamina] += block[PlayerStat.stamina]
             damage = max(5, damage)
@@ -171,31 +174,37 @@ class Player:
                 damage *= 2
                 if target_role == -1:
                     damage *= 2
-                    print(utils.colorize("Critical Hit, while off guard! 4x damage", ['bold', 'red', 'on_black']))
+                    if verbose:
+                        print(utils.colorize("Critical Hit, while off guard! 4x damage", ['bold', 'red', 'on_black']))
                 
                 elif target_role == -2:
                     damage /= 2
-                    print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
+                    if verbose:
+                        print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
 
                 else:
-                    print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
+                    if verbose:
+                        print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
 
             elif attacker_role == -1:
                 if target == -2 and not range_weapon:
                     self_damage = target.stats[PlayerStat.attack]//4
                     self.attr[PlayerStat.health] -= self_damage
-                    print(f'{target.name} Revesed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health)}')
+                    if verbose:
+                        print(f'{target.name} Revesed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health)}')
                 else:
                     damage = 0
-                    print(utils.colorize('Attacker Epic Miss!', ['bold', 'red', 'on_black']))
+                    if verbose:
+                        print(utils.colorize('Attacker Epic Miss!', ['bold', 'red', 'on_black']))
 
             target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
             sta_degredation = min(0,effects.get(PlayerStat.stamina, 0))
             self.attr[PlayerStat.stamina] += sta_degredation # reduce player stamina
-            if effects.get(PlayerStat.attack, 0) == 0:
-                print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)}!") # Print attack message
-            else:
-                print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)} with a \033[1m\033[4m{'Ranged Weapon' if range_weapon else 'Melee Weapon'}\033[0m!") # Print attack message
+            if verbose:
+                if effects.get(PlayerStat.attack, 0) == 0:
+                    print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)}!") # Print attack message
+                else:
+                    print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)} with a \033[1m\033[4m{'Ranged Weapon' if range_weapon else 'Melee Weapon'}\033[0m!") # Print attack message
             return {PlayerStat.attack:damage, PlayerStat.stamina: sta_degredation}
         else:
             return self.attack(target=target)
@@ -213,24 +222,29 @@ class Player:
 
                 if attacker_role == -2:
                     damage *= 2
-                    print("Critical hit!")
+                    if verbose:
+                        print("Critical hit!")
                 elif attacker_role == -1:
                     damage //= 2
-                    print('You fialed to cast your spell')
+                    if verbose:
+                        print(f'{player} fialed to cast spell')
 
                 damage -= player.stats[PlayerStat.defense] # Reduce damage based on target's defense 
                 damage = max(1, damage) # Make sure damage is at least 1
 
                 if target_role == -2:
                     damage == 0
-                    print("Attack Dodged!")
+                    if verbose:
+                        print("Attack Dodged!")
                 elif target_role == -1:
                     damage *= 2
-                    print('Enemy caught off guard!')
+                    if verbose:
+                        print('Enemy caught off guard!')
 
                 player.attr[PlayerStat.health] = max(0, player.attr[PlayerStat.health] - damage) # Apply damage
                 self.attr[PlayerStat.mana] = max(0,self.attr[PlayerStat.mana] + effects.get(PlayerStat.mana, 0)) # reduce player stamina
-                print(f"{self.name} [{utils.colorize(self.attr[PlayerStat.mana], StatColor.mana.value)}] used {utils.colorize(effects[PlayerStat.mana], StatColor.mana.value)} cast magic on {player.name} for {utils.colorize(damage, StatColor.attack.value)} damage!")
+                if verbose:
+                    print(f"{self.name} [{utils.colorize(self.attr[PlayerStat.mana], StatColor.mana.value)}] used {utils.colorize(effects[PlayerStat.mana], StatColor.mana.value)} cast magic on {player.name} for {utils.colorize(damage, StatColor.attack.value)} damage!")
 
             else:
                 buff = list(effects.keys())
@@ -244,11 +258,14 @@ class Player:
                         player.attr[att] = min(100, effects[att] + player.attr[att])
                     elif att in player.stats.keys():
                         player.stats[att] = min(50, effects[att] + player.stats[att])
-                print(res+']')
+                
+                if verbose:
+                    print(res+']')
             
             return 0
         else:
-            print('cannot use this spell')
+            if verbose:
+                print('cannot use this spell')
             return 1
 
     def use_item(self, effects, target: 'Player'=None):
@@ -264,7 +281,8 @@ class Player:
                 elif key in player.attr.keys():
                     player.attr[key] = min(100, val + player.attr[key])
         res += f' from {self.name}\'s potion!'
-        print(res)
+        if verbose:
+            print(res)
 
     def use(self, item, target: 'Player'=None, use_armor=True):
         effects = item.use()
@@ -287,7 +305,8 @@ class Player:
         self.items[item.type].remove(item)
         target.items[item.type].append(temp)
         target.sort_inv()
-        print(f'{self.name} gave {target.name} - {utils.colorize(item.type.name, ["bold", "cyan", "on_black"])}')
+        if verbose:
+            print(f'{self.name} gave {target.name} - {utils.colorize(item.type.name, ["bold", "cyan", "on_black"])}')
 
     def sort_inv(self):
         for item_list in self.items.values():
