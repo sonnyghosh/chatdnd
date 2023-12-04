@@ -8,9 +8,9 @@ sys.path.append(os.path.dirname(PARENT_DIR))
 import hypers
 from game.gametests.auto_test_game import test_game
 
-item_hypers, player_hypers = hypers.load_hypers()  
+item_hypers, player_hypers, meta_params = hypers.load_hypers() 
 
-num_tests = 500
+num_tests = 1000
 
 correct_preds = 0
 for lev in range(num_tests):

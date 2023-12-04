@@ -49,7 +49,8 @@ def load_hypers():
         data = json.load(f)
     item_hypers = convert_keys(data['item_hypers'])
     player_hypers = convert_keys(data['player_hypers'])
-    return item_hypers, player_hypers 
+    meta_params = data['meta']
+    return item_hypers, player_hypers, meta_params
 
 def randomize(hyper_params):
     hyper_param = hyper_params.copy()

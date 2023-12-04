@@ -7,7 +7,7 @@ import os
 import time
 from game.gametests import utils
 balance_dict = g_vars.config['balance']
-item_hypers, player_hypers = hypers.load_hypers()
+item_hypers, player_hypers, meta_params = hypers.load_hypers()
 
 verbose = g_vars.config['meta']['verbose']
 

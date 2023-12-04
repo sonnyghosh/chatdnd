@@ -4,7 +4,7 @@ ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor
 config = g_vars.config
-item_hypers, player_hypers = hypers.load_hypers()
+item_hypers, player_hypers, meta_params = hypers.load_hypers()
 from game.gametests import utils
 verbose = g_vars.config['meta']['verbose']
 """

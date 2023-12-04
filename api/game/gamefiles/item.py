@@ -3,7 +3,7 @@ from . import g_vars, item, hypers
 PlayerStat = g_vars.PlayerStat
 ItemType = g_vars.ItemType
 balance_dict = g_vars.config['balance']
-item_hypers, player_hypers = hypers.load_hypers()
+item_hypers, player_hypers, meta_params = hypers.load_hypers()
 
 class Item:
     """
@@ -38,7 +38,7 @@ class Item:
     def get_rank(self):
         new_rank = 0
         if self.uses != 0:
-            new_rank = sum([(item_hypers.get(key, 0) + player_hypers.get(key,0)) * val for key, val in self.effects.items()]) * min(10, abs(self.uses))
+            new_rank = sum([(item_hypers.get(key, 0) + player_hypers.get(key,0)) * val for key, val in self.effects.items()]) * (min(10, abs(self.uses)) * meta_params['use_scale'])
         self.rank = max(0.1, new_rank)
         return self.rank
 
@@ -85,6 +85,7 @@ class Item:
         """
         if self.uses > 0:
             self.uses -= 1
+            self.rank = self.get_rank()
             return self.effects
         elif self.uses == -99:
             return self.effects
