@@ -53,10 +53,10 @@ class Battle:
             ranged_possible = player.get_item_type(ItemType.ranged)
             melee_possible = player.get_item_type(ItemType.melee)
             weapon_choice = ranged_possible if len(ranged_possible) > len(melee_possible) else melee_possible
-            target = random.choice(op_party)
+            target = random.choice(op_party) # TODO: make a decision on which enemey is the best to attack
             if random.random() > 0.1 and len(weapon_choice) > 0:
                 if len(weapon_choice) > 1:
-                    weapon = random.choices([i for i in range(len(weapon_choice))], weights=[a.rank for a in weapon_choice])[0]
+                    weapon = random.choices([i for i in range(len(weapon_choice))], weights=[a.rank for a in weapon_choice])[0] # TODO: make a selection mechanism for items
                 else:
                     weapon = 0
             else:
@@ -185,6 +185,7 @@ class Battle:
         return use_log, st
 
     def give_move(self, player, mode, cur_party, toggle, op_party, action):
+        # TODO: make this intelligent
         if mode != 'player':
             target = random.choice(cur_party)
             possible = []
