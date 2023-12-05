@@ -1,4 +1,6 @@
 import React from "react";
+import { InventoryContainer } from ".";
+import { PartyContainer } from ".";
 
 export const ReadoutRow = () => {
     return (
@@ -10,26 +12,10 @@ export const ReadoutRow = () => {
     )
 }
 
-function EnvironmentContainer() {
-
-}
-
-function InventoryContainer() {
-    const inventoryResponse = {
-        gold : 150,
-        gems : 50,
-        crystals : 20
-    }
-    const {gold, gem, crystals} = inventoryResponse;
+function EnvironmentContainer(imgSrc) {
     return (
-        <div className="flex flex-col w-1/3 bg-slate-800 border border-red-800">
-            <div className="flex flex-row"></div>
-            <div className="flex flex-row"></div>
-            <div className="flex flex-row"></div>
+        <div className="h-80 rounded-md border">
+            <img src={imgSrc} />
         </div>
     )
-}
-
-function PartyContainer() {
-
 }
