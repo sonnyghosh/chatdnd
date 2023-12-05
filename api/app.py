@@ -10,10 +10,10 @@ import firebase_admin
 app = Flask(__name__, template_folder='templates')
 CORS(app)
 # Initialize Firestore DB
-cred = credentials.Certificate('key.json')
-default_app = initialize_app(cred)
-db = firestore.client()
-todo_ref = db.collection('todos')
+# cred = credentials.Certificate('key.json')
+# default_app = initialize_app(cred)
+# db = firestore.client()
+# todo_ref = db.collection('todos')
 
 @app.route('/', methods=['POST', 'GET'])
 def index():

@@ -1,4 +1,4 @@
-import "./PartyContainer.css"
+// import "./PartyContainer.css"
 export const PartyContainer = (PartyMembers) => {
     const { partyList } = PartyMembers;
     const numPartyList = partyList.length;  

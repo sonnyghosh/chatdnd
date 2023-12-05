@@ -14,7 +14,7 @@ services:
       dockerfile: Dockerfile.client
     image: dnd-client
     volumes:
-      - ./src:/app/src
-      - ./public:/app/public
+      - ./dnd-client/src:/app/src
+      - ./dnd-client/public:/app/public
     ports:
       - "3000:3000" 

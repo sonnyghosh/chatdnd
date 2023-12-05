@@ -1,14 +1,16 @@
-FROM node as build-setup
+FROM node:21 as build-setup
 WORKDIR /app
 ENV PATH ./node_modules/.bin:$PATH
 COPY /dnd-client/package.json ./
-RUN npm install
+RUN yarn install
 COPY ./dnd-client/src ./src
 COPY ./dnd-client/public ./public
 COPY ./dnd-client/tailwind.config.js ./
 COPY ./dnd-client/postcss.config.js ./
 COPY ./dnd-client/vite.config.js ./
-CMD ["npm", "start"]
+COPY ./dnd-client/index.html ./
+COPY ./dnd-client/utils.js ./ 
+CMD ["yarn", "dev"]
 
 
 # FROM nginx
