@@ -124,7 +124,7 @@ partyContainer1.args = {
 
 export const PartyContainer2 = Template.bind();
 PartyContainer2.args = {
-    partyList : partyList.slice(1, 2)
+    partyList : partyList.slice(1, 3)
 }
 
 export const PartyContainer3 = Template.bind();
