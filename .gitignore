@@ -166,8 +166,22 @@ key.json
 
 api/api-env
 
-
 node_modules
 
 package-lock.json
 api/.env
+
+.vscode
+
+.yarn
+
+yarn.lock
+
+.storybook
+
+.yarnrc
+
+.yarnrc.yml
+
+dnd-client/.eslintrc.cjs
+install_nvm.sh
