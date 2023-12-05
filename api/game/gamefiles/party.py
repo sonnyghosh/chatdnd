@@ -38,6 +38,9 @@ class Party:
         cur_pt = self.get_alive_players()
         return max(0.01,sum([pl.get_rank() for pl in cur_pt]))
 
+    def get_unputs(self):
+        pass
+    
     def get_party_members_names(self):
         res = f'{self.name}\n'
         for idx, pl in enumerate(self.get_alive_players()):

@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+import cProfile
 from contextlib import redirect_stdout
 CURRENT_DIR = os.path.dirname(__file__)
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
@@ -66,4 +67,10 @@ def auto_test_levels(party_size, num_games, num_levels):
         utils.cross_stats(master_stats[level])
     return master_stats
 
-#auto_test_levels(party_size=1, num_games=150, num_levels=8)
+auto_test_levels(party_size=1, num_games=150, num_levels=8)
+
+#p_s = 3
+#lev = 50
+#gen_pty = True
+
+#cProfile.run('test_game(p_s, lev, gen_pty)')

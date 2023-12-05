@@ -19,7 +19,7 @@ def test_item_init(basic_item):
     assert basic_item.effects == {PlayerStat.health: 20}
 
 def test_item_str(basic_item):
-    assert str(basic_item) == "potion - Rank: 6, Uses: 3, Effects [ HP: 20 ]"
+    assert str(basic_item) == "potion - Rank: 10, Uses: 3, Effects [ HP: 20 ]"
 
 def test_validate_effects_valid(basic_item):
     assert basic_item.validate_effects() == True

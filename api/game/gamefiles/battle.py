@@ -101,7 +101,7 @@ class Battle:
         # TODO: Make intelligent method of selecting moves
         # Random item to use for the bot
         if mode != 'player':
-            target = random.choice(op_party)
+            target = op_party[-1]#random.choice(op_party)
             possible = []
             tries = 0
             while len(possible) == 0:
