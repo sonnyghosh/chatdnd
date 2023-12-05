@@ -1,10 +1,8 @@
-import os
 from flask import Flask, request, jsonify, redirect, render_template, url_for
 from flask_cors import CORS
 from datetime import datetime
 from firebase_admin import credentials, firestore, initialize_app
-import firebase_admin
-# from aiapi import generateStoryResponse
+from aiapi import generateStoryResponse
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates')
