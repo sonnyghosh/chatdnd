@@ -2,6 +2,8 @@ from game.gamefiles import g_vars
 PlayerStat = g_vars.PlayerStat
 import os
 
+dataset_file = "./api/game/gamefiles/data/dataset.txt"
+
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')
 

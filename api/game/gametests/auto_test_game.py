@@ -29,7 +29,7 @@ def test_game(party_size, level, generate_party):
     st['Player'] = utils.agg(st['Player'], {'power':player_power})
     st['Enemy'] = utils.agg(st['Enemy'], {'power':enemy_power})
     current_battle = battle.Battle(player_party, enemy_party)
-    battle_stats = current_battle.start_game(auto_play=True)
+    battle_stats = current_battle.start_game(auto_play=True, save_data=True)
     st['Player'] = utils.agg(st['Player'], battle_stats[0])
     st['Enemy'] = utils.agg(st['Enemy'], battle_stats[1])
     return st, player_power/enemy_power, st['Player'].get('Wins', 0)

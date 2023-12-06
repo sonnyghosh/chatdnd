@@ -8,6 +8,7 @@ from game.gamefiles import battle, party
 from game.gametests import utils
 
 player_party = party.generate_party(2, 'Dike Tyson\'s Squad', avg_level=100)
+print(player_party.get_inputs())
 print('Your Power level: ',player_party.get_power_level())
 enemy_party = party.generate_party(3, 'Enemy Squad', avg_level=80)
 print('Enemy Power level: ',enemy_party.get_power_level())

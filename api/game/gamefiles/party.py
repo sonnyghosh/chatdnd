@@ -6,6 +6,14 @@ config = g_vars.config
 from game.gametests import utils
 import random
 
+def average_arrays(lists):
+    result = []
+    for i in range(len(lists[0])):
+        values = [list[i] for list in lists]
+        avg = sum(values) / len(values)
+        result.append(avg)
+    return result
+
 class Party:
     def __init__(self, members, name):
         self.name = name
@@ -40,7 +48,7 @@ class Party:
 
     def get_unputs(self):
         pass
-    
+
     def get_party_members_names(self):
         res = f'{self.name}\n'
         for idx, pl in enumerate(self.get_alive_players()):
@@ -49,13 +57,17 @@ class Party:
             res += f'\t|{"".join([utils.colorize(f"{key.name}: {val} |", key.color().value) for key, val in pl.stats.items()])}\n'
         return res
     
+    def get_inputs(self):
+        arrs = [pl.get_inputs() for pl in self.get_alive_players()]
+        return average_arrays(arrs) + [self.get_power_level()] 
+
 names = ["Blaze", "Rebel", "Ace", "Rogue", "Phoenix", "Echo", "Zenith", "Valor", "Cipher", "Nova", "Trinity", "Neo", "Onyx", "Astra", "Azure", "Bex", "Briar", "Cove", "Halo", "Ivory", "Jupiter", "Kai", "Lev", "Nyx", "Reign", "Rune", "Wren", "Zephyr"]
 
 def generate_party(n_members, squad_name, avg_level=50, level_sd=5):
     members = []
-    for _ in range(n_members):
-        nm = random.choice(names)
+    nm = random.choices(names, k=n_members)
+    for i in range(n_members):
         level = int(max(0,min(100,random.normalvariate(mu=avg_level, sigma=level_sd))))
-        pl = player.generate_player(nm, level)
+        pl = player.generate_player(nm[i], level)
         members.append(pl)
     return Party(members, name=squad_name)

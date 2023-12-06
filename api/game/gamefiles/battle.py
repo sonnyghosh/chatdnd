@@ -1,11 +1,12 @@
 import random
-from . import party, g_vars, hypers, AI
+from . import item, g_vars, hypers, AI, save_load
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor
 import os
 import time
 from game.gametests import utils
+save_location = utils.dataset_file
 balance_dict = g_vars.config['balance']
 item_hypers, player_hypers, meta_params = hypers.load_hypers()
 
@@ -45,7 +46,7 @@ class Battle:
             clr_t()
         if verbose:
             print(f'{player.name} has rested and gained {utils.colorize("+"+str(health_gain)+" HP", "green")}, {utils.colorize("+"+str(mana_gain)+" MP", "magenta")} and {utils.colorize("+"+str(stamina_gain)+" STA", "yellow")}.')
-        return {PlayerStat.stamina : stamina_gain, PlayerStat.health : health_gain, PlayerStat.mana: mana_gain}, st
+        return {PlayerStat.stamina : stamina_gain, PlayerStat.health : health_gain, PlayerStat.mana: mana_gain}, st, item.Pass
 
     def attack_move(self, player, mode, op_party, op_toggle, debug, auto_play, st):
         # choosing a weapon from 'weapon_choice'
@@ -53,7 +54,7 @@ class Battle:
             ranged_possible = player.get_item_type(ItemType.ranged)
             melee_possible = player.get_item_type(ItemType.melee)
             weapon_choice = ranged_possible if len(ranged_possible) > len(melee_possible) else melee_possible
-            target = op_party[-1]#random.choices(op_party, weights=[1/p.stats[PlayerStat.defense] for p in op_party])[0] # TODO: make a decision on which enemey is the best to attack
+            target = random.choices(op_party, weights=[1/(p.stats[PlayerStat.defense] + p.attr[PlayerStat.health]) for p in op_party])[0] # TODO: make a decision on which enemey is the best to attack
             if random.random() > 0.1 and len(weapon_choice) > 0:
                 if len(weapon_choice) > 1:
                     weapon = 0 #random.choices([i for i in range(len(weapon_choice))], weights=[a.rank for a in weapon_choice])[0] # TODO: make a selection mechanism for items
@@ -95,9 +96,10 @@ class Battle:
         else:
             st = agg(st, {'fist':1})      
             use_log = player.attack(target, use_armor=use_armor)
-        return use_log, st
+            weapon = item.Fist
+        return use_log, st, weapon
 
-    def use_move(self, player, mode, op_party, op_toggle, cur_party, st, action):
+    def use_move(self, player, mode, op_party, op_toggle, cur_party, st):
         # TODO: Make intelligent method of selecting moves
         # Random item to use for the bot
         if mode != 'player':
@@ -121,9 +123,10 @@ class Battle:
                 item = possible[0]
         # player Picks Item to use
         else:
-            #print(action)
+            item_type = prompt_user('[0]: Potion\n[1]: Magic\nWhich would you like to use: ', 
+                                    invalid=lambda x: type(x) is not ItemType,
+                                    fn=lambda x: ItemType(int(x.strip())))
             spacer = '\n\t'
-            item_type = ItemType(int(action.split()[1]))
             item_list = player.items[item_type] 
             prompt = f'{player.name}\'s Current Items:{spacer}{player.get_item_type_str(item_type, numbered=True)}\nPlease enter the item that you want to use: '
             item_ind = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(item_list)), fn=lambda x: int(x))
@@ -153,7 +156,7 @@ class Battle:
                 # Use on party member
                 else:
                     targets = self.player_party.get_party_members_names()
-                    prompt = f'{targets}\nWho would you like to use {item.name} on? Enter the number of the character: '
+                    prompt = f'{targets}\nWho would you like to use {item.type.name} on? Enter the number of the character: '
 
                     if len(targets) > 1:
                         target_idx = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(cur_party)), fn=lambda x: int(x))
@@ -182,9 +185,9 @@ class Battle:
                 clr_t()
                 use_log = player.use(item, op_party[target_idx])
 
-        return use_log, st
+        return use_log, st, item
 
-    def give_move(self, player, mode, cur_party, toggle, op_party, action):
+    def give_move(self, player, mode, cur_party, toggle, op_party):
         # TODO: make this intelligent
         if mode != 'player':
             target = random.choice(cur_party)
@@ -221,9 +224,9 @@ class Battle:
                                  fn=lambda x : int(x))
             target = party_members[target]
         player.give(item, target)
-        return {'give':1}
+        return {'give':1}, item
 
-    def play_turn(self, mode='enemy', debug=False, auto_play=False):
+    def play_turn(self, mode='enemy', debug=False, auto_play=False, data_parser=None):
         if verbose:
             print()
             if debug:
@@ -256,7 +259,16 @@ class Battle:
         for player in cur_party:
             use_log = {}
             op_party = op_toggle.get_alive_players()
+            
+            cur_party_pow = toggle.get_power_level()
+            op_party_pow = op_toggle.get_power_level()
+            start_diff = cur_party_pow-op_party_pow
             if len(op_party) < 1: break
+
+            # create inputs for AI
+            party_state = toggle.get_inputs()
+            enemy_state = op_toggle.get_inputs()
+            player_input = player.get_inputs()
 
             # print out all of the players that are still alive
             if debug and mode=='player':
@@ -281,8 +293,8 @@ class Battle:
             # random action for bot
             else:
                 if mode == 'ai':
-                    state = {'player': player, 'Enemies': op_party, 'friends': cur_party}
-                    AI.make_move(state)
+                    state = {'player': player, 'friends': toggle, 'Enemies': op_toggle}
+                    item, target = AI.make_move(state)
                 else:
                     action = random.choices(balance_dict['player']['possible_actions'], weights=balance_dict['player']['action_weight'])[0]
                 
@@ -290,57 +302,65 @@ class Battle:
                     print(utils.colorize(f'{toggle.name}', 'red' if mode == 'enemy' else 'cyan'), utils.colorize(f'Team making action:', 'green'), utils.colorize(f'{action}', ['bold', 'on_cyan'] if action == 'use' else ['bold', 'on_green'] if action == 'pass' else ['bold', 'on_yellow'] if action == 'give' else ['bold', 'on_red']))
 
             # Action - Pass: regens HP, MP, STA
-            if action == 'pass' or (mode != 'player' and (player.attr[PlayerStat.mana] < player.attr[PlayerStat.level]/balance_dict['battle']['mana_thresh'] or player.attr[PlayerStat.stamina] < player.attr[PlayerStat.level]/balance_dict['battle']['stamina_thresh'])):
-                use_log, st = self.pass_move(player=player, mode=mode, st=st)
+            if (action in ['pass', 3]) or (mode != 'player' and (player.attr[PlayerStat.mana] < player.attr[PlayerStat.level]/balance_dict['battle']['mana_thresh'] or player.attr[PlayerStat.stamina] < player.attr[PlayerStat.level]/balance_dict['battle']['stamina_thresh'])):
+                use_log, st, thing = self.pass_move(player=player, mode=mode, st=st)
                 assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
 
             # Action - Attack
-            elif action == 'attack':
-                use_log, st = self.attack_move(player, mode, op_party, op_toggle, debug, auto_play, st)
+            elif action in ['attack', 0]:
+                use_log, st, thing = self.attack_move(player, mode, op_party, op_toggle, debug, auto_play, st)
                 assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
             
             # Action - Use an Item
-            elif action.startswith('use'):
-                use_log, st = self.use_move(player, mode, op_party, op_toggle, cur_party, st, action)
+            elif action in ['use', 1]:
+                use_log, st, thing = self.use_move(player, mode, op_party, op_toggle, cur_party, st)
                 assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
                 
             # Action - Give item to teammate
-            elif action == 'give':
-                use_log = self.give_move(player, mode, cur_party, toggle, op_party, action)
+            elif action in ['give', 2]:
+                use_log, thing = self.give_move(player, mode, cur_party, toggle, op_party)
                 assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
 
             #assert type(st) is dict and type(use_log) is dict, f'{action}, {st}, {use_log}'
-
+            end_cur_party_pow = toggle.get_power_level()
+            end_op_party_pow = op_toggle.get_power_level()
+            end_diff = end_cur_party_pow-end_op_party_pow
+            reward = end_diff - start_diff
+            state = party_state + enemy_state + player_input + thing.get_inputs()
+            if data_parser:
+                data_parser.add_data(state, reward)
+            st = agg(st, {'reward': reward})
             st = agg(st, use_log)
 
         return st
 
-    def combat_round(self, debug=False, auto_play=False):
+    def combat_round(self, debug=False, auto_play=False, data_save=None):
         # Player turn
         if auto_play:
-            p_stats = self.play_turn(mode='auto', debug=debug, auto_play=auto_play)
-            p_stats['score'] = sum([])
+            p_stats = self.play_turn(mode='auto', debug=debug, auto_play=auto_play, data_parser=data_save)
         else:
             p_stats = self.play_turn(mode='player')
         p_stats['moves'] = p_stats.get('moves',0) + len(self.player_party.get_alive_players())
         p_stats['turns'] = p_stats.get('turns',0) + 1
         # Enemy turn 
-        e_stats = self.play_turn(mode='enemy', debug=debug, auto_play=auto_play)
+        e_stats = self.play_turn(mode='enemy', debug=debug, auto_play=auto_play, data_parser=data_save)
+
         e_stats['moves'] = e_stats.get('moves',0)  + len(self.enemy_party.get_alive_players())
         e_stats['turns'] = e_stats.get('turns',0) + 1
         self.validate()
         return p_stats, e_stats
     
-    def start_game(self, debug=False, auto_play=False, readable=False):
+    def start_game(self, debug=False, auto_play=False, readable=False, save_data=False):
         ts  = 0.00001 if not readable else 0.9
         p_stats = {}
         e_stats = {}
+        data_parser = save_load.DataSaverLoader(save_location)
         if not (debug or auto_play):
             input('Press any key to begin the battle!')
             clr_t()
 
         while (self.player_party.get_alive_players() and self.enemy_party.get_alive_players()):
-            a,b = self.combat_round(debug=debug, auto_play=auto_play)
+            a,b = self.combat_round(debug=debug, auto_play=auto_play, data_save=data_parser if save_data else None)
             p_stats = agg(p_stats, a)
             e_stats = agg(e_stats, b)
             if readable and debug:
@@ -357,7 +377,8 @@ class Battle:
                     print('You won, Congratulations!')
                 else:
                     print('You Lose, Weep in pain!')
-
+        data_parser.save_data()
+        del data_parser
         if not auto_play:
             return {'Player':p_stats, 'Enemy': e_stats}
         else:

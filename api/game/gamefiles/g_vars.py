@@ -6,6 +6,7 @@ class ItemType(Enum):
     armor = 2
     melee = 3
     ranged = 4
+    none = 5
 
 class PlayerStat(Enum):  
     attack = 'ATK'
@@ -78,13 +79,13 @@ config = {
             'stamina_thresh': 2
         },
         'player': {
-            "possible_actions" : ['attack', 'use', 'pass', 'give'],
+            "possible_actions" : [0, 1, 2, 3],
             "action_weight": [0.6, 0.3, 0.05, 0.05]
         },
         'item': {
             'magic_weights' : [0.5, 0.2, 0.1, 0.1, 0.1],
-            'potion_weights': [0.05,0.15,0.1,0.1,0.1,0.25,0.125,0.125],
-            'item_gen': [0,1,2,3,4,0,1,2,0,3,4,1,1,2,0,1,0,1]
+            'potion_weights': [0.05, 0.15, 0.1, 0.1, 0.1, 0.25, 0.125, 0.125],
+            'item_gen': [0, 1, 2, 3, 4, 0, 1, 2, 0, 3, 4, 1, 1, 2, 0, 1, 0, 1]
         },
         'party': {
             

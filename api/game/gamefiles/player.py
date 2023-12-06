@@ -27,26 +27,27 @@ class Player:
     '''
     These are all of the stats for the players they are organized in 3 different areas based on type
     stats = {
-        'ATK': 0-50,
-        'DEF': 0-50,
-        'CHA': 0-50,
-        'INT': 0-50,
-        'WIS': 0-50
+        <PlayerStat.attack,'ATK'>: 0-50,
+        <PlayerStat.attack,'DEF'>: 0-50,
+        <PlayerStat.attack,'CHA'>: 0-50,
+        <PlayerStat.attack,'INT'>: 0-50,
+        <PlayerStat.attack,'WIS'>: 0-50
     }
 
     attr = {
-        'LVL': 0-100,
-        'HP': 0-100,
-        'MP': 0-100,
-        'STA': 0-100,
+        <PlayerStat.level,'LVL'>: 0-100,
+        <PlayerStat.health,'HP'>: 0-100,
+        <PlayerStat.mana,'MP'>: 0-100,
+        <PlayerStat.stamina,'STA'>: 0-100,
         'name': str,
     }
 
     items = {
-        'potions' 0: [Item(type=0)...],
-        'magic' 1: [Item(type=1)...],
-        'weapons' 2:[Item(type=2)...],
-        'armor' 3: [Item(type=3)...]
+        <ItemType.potion, 0>: [Item(ItemType=0)...],
+        <ItemType.magic, 1>: [Item(ItemType=1)...],
+        <ItemType.melee, 3>: [Item(ItemType=3)...],
+        <ItemType.ranged, 4>: [Item(ItemType=4)...],
+        <ItemType.armor, 2>: [Item(type=2)...]
     }
     '''
     def __init__(self, stats, attr, items):
@@ -62,7 +63,7 @@ class Player:
             stat_rank = sum([player_hypers[key] * val for key, val in self.stats.items()])/max(1,len(self.stats.values()))
             items_rank = sum([sum([i.rank for i in it])/max(1,len(it)) for it in self.items.values()])/max(1,len(self.items))
             attr_rank = sum([player_hypers[key] * att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)
-            self.rank = float((stat_rank + items_rank) * attr_rank)
+            self.rank = round(float((stat_rank + items_rank) * attr_rank)/10, ndigits=2)
         else:
             self.rank = 0
         return self.rank
@@ -134,20 +135,23 @@ class Player:
 
     def get_dice_roll(self, ranged=False) -> tuple:
         min_roll = 0
-        max_roll = 1 
-        for stat in self.stats.values():
-            min_roll += 0.02 * stat
-            max_roll += 0.08 * stat
-        
+        max_roll = 1 + int(self.attr[PlayerStat.level]/5)
         roll = random.randint(int(min_roll), int(max_roll))
-        misses = list(range(int(min_roll), int(min_roll+1))) if ranged else [min_roll]
-        if roll in misses:
-            return -1
-        elif roll == max_roll:
+
+        if max_roll == 1:
+            if roll == 1:
+                return roll
+            else:
+                return -1
+        
+        elif roll >= int(max_roll *0.9):
             return -2
+        
+        elif ranged and (roll in [0,1] or roll == 0):
+            return -1
         else:
             return roll
-
+            
     def attack(self, target: 'Player', use_armor=True):
         return self.use_attack({PlayerStat.attack:0, PlayerStat.stamina: -random.randint(1,4)}, ItemType.melee, target, use_armor=use_armor)
 
@@ -156,8 +160,8 @@ class Player:
         if effects:
             range_weapon = True if itemtype == ItemType.ranged else False
             # get roles for players
-            attacker_role = self.get_dice_roll(range_weapon) # -2 - 20
-            target_role = target.get_dice_roll() # -2 - 20
+            attacker_roll = self.get_dice_roll(range_weapon) # -2 - 20
+            target_roll = target.get_dice_roll() # -2 - 20
 
             damage = self.stats[PlayerStat.attack] # Calculate base damage 
             damage += effects.get(PlayerStat.attack, 0)   # Add damage effects from item
@@ -170,39 +174,39 @@ class Player:
                     if verbose:
                         print(f'{target.name} is using [{utils.colorize(str(block[PlayerStat.stamina])+" STA", StatColor.stamina.value)}] armor to add [{utils.colorize(str(block[PlayerStat.defense])+" DEF" , StatColor.defense.value)}]!') 
                     damage -= block[PlayerStat.defense]
-                    target.attr[PlayerStat.stamina] += block[PlayerStat.stamina]
+                    target.attr[PlayerStat.stamina] = max(0, block[PlayerStat.stamina] + target.attr[PlayerStat.stamina])
             damage = max(5, damage)
             # chance for critical hit based on roll
-            if attacker_role == -2:
+            if attacker_roll == -2:
                 damage *= 2
-                if target_role == -1:
+                if target_roll == -1:
                     damage *= 2
                     if verbose:
                         print(utils.colorize("Critical Hit, while off guard! 4x damage", ['bold', 'red', 'on_black']))
                 
-                elif target_role == -2:
+                elif target_roll == -2:
                     damage /= 2
                     if verbose:
                         print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
 
                 else:
                     if verbose:
-                        print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
+                        print(utils.colorize("Critical Hit! 2x damage", ['bold', 'red', 'on_black']))
 
-            elif attacker_role == -1:
-                if target == -2 and not range_weapon:
-                    self_damage = target.stats[PlayerStat.attack]//4
-                    self.attr[PlayerStat.health] -= self_damage
+            elif attacker_roll == -1:
+                if target_roll == -2 and not range_weapon:
+                    self_damage = target.stats[PlayerStat.attack]//2
+                    self.attr[PlayerStat.health] = max(0, self.attr[PlayerStat.health] - self_damage)
                     if verbose:
-                        print(f'{target.name} Revesed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health)}')
+                        print(f'{target.name} Critically Reversed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health)}')
                 else:
                     damage = 0
                     if verbose:
                         print(utils.colorize('Attacker Epic Miss!', ['bold', 'red', 'on_black']))
 
             target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
-            sta_degredation = min(0,effects.get(PlayerStat.stamina, 0))
-            self.attr[PlayerStat.stamina] += sta_degredation # reduce player stamina
+            sta_degredation = min(0, effects.get(PlayerStat.stamina, 0))
+            self.attr[PlayerStat.stamina] = max(0, sta_degredation + self.attr[PlayerStat.stamina]) # reduce player stamina
             if verbose:
                 if effects.get(PlayerStat.attack, 0) == 0:
                     print(f"{self.name} [{utils.colorize(str(target.attr[PlayerStat.stamina])+' STA', StatColor.stamina.value)}] Lost {utils.colorize(str(sta_degredation)+' STA', StatColor.stamina.value)} attacking {target.name} [{utils.colorize(str(target.attr[PlayerStat.health])+' HP', StatColor.health.value)}] for {utils.colorize( str(damage)+' ATK', StatColor.attack.value)}!") # Print attack message
@@ -315,6 +319,9 @@ class Player:
         for item_list in self.items.values():
             item_list.sort(key=lambda x: (x.rank, next(iter(x.effects.values()))), reverse=True)
         return self
+
+    def get_inputs(self):
+        return [val for val in self.stats.values()] + [val for key, val in self.attr.items() if key != 'name']
 
 def generate_player(name, level=None):
     attr = {

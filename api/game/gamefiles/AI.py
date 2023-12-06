@@ -1,35 +1,44 @@
-from . import g_vars, hypers
+import sys
+import os
+CURRENT_DIR = os.path.dirname(__file__)
+PARENT_DIR = os.path.dirname(CURRENT_DIR)
+sys.path.append(os.path.dirname(PARENT_DIR))
+
+from game.gamefiles import g_vars, hypers, save_load
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 
-def make_move(state) -> str:
-    cur_player = state['player']
-    cur_team = state['friends']
-    op_team = state['enemy']
+dataset_file = "./api/game/gamefiles/data/dataset.txt"
+
+data_parser = save_load.DataSaverLoader(dataset_file)
+
+if True:
+    X, Y = data_parser.load_data()
+
+    # Split the data into training and testing sets
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+    # Initialize the Decision Tree Regressor
+    decision_tree_model = DecisionTreeRegressor()
+
+    # Train the model
+    decision_tree_model.fit(X_train, Y_train)
+
+    # Make predictions on the test set
+    predictions = decision_tree_model.predict(X_test)
+
+    # Evaluate the model
+    mse = mean_squared_error(Y_test, predictions)
+    print(f"Mean Squared Error: {mse}")
+
+
+def make_move(state):
+    pass
+
+
+
     
-    our_rank = cur_team.get_power_level()
-    their_rank = op_team.get_power_level()
-
-    my_health = cur_player.stats[PlayerStat.health]
-    my_stamina = cur_player.stats[PlayerStat.health]
-    my_mana = cur_player.stats[PlayerStat.health]
-    my_rank = cur_player.rank
-
-    best_potion = cur_player.items[ItemType.potion]
-    best_magic = cur_player.items[ItemType.potion]
-    best_ranged = cur_player.items[ItemType.potion]
-    best_melee = cur_player.items[ItemType.potion]
-
-    possible_targets = [p for p in op_team if p.rank < my_rank]
-
-    if our_rank > their_rank:
-        # we are currently expected to win
-        if  my_health < 10:
-            return 'pass'
-        elif my_stamina > 30:
-            return 'attack'
-    else:
-        # we are currently expected to lose
-        if my_health < 10:
-            return 'pass'
