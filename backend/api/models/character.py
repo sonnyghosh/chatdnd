@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from inventory import Inventory
 
+from inventory import Inventory
+from item import Item
 @dataclass
 class Character:
     id : int
@@ -21,20 +22,19 @@ class Character:
     charisma : int 
 
     def purchaseItem(self, item_idx):
-        # TODO cur_item = get(item_idx)
-        # TODO item_price = (item_idx.numGems, item_idx.numCrystals, item_idx.numDiamonds)
-        (item_gems, item_crystals, item_diamonds) = item_price
-        if item_gems < self.numGems and item_crystals < self.numCrystals and item_diamonds < self.numDiamonds:
+        cur_item = Item.get(item_idx)
+        item_price = (cur_item.numGems, cur_item.numCrystals, cur_item.numDiamonds)
+        if cur_item.numGems < self.numGems and item_crystals < self.numCrystals and item_diamonds < self.numDiamonds and self.inventory.storeItem(item_idx):
             self.numGems -= item_gems
             self.numCrystals -= item_crystals
             self.numDiamonds -= item_diamonds
-            self.inventory.storeItem(item_idx)
+            return True
         return False
     
     def sellItem(self, item_idx):
-        # TODO cur_item = get(item_idx)
-        # TODO item_price = (item_idx.numGems, item_idx.numCrystals, item_idx.numDiamonds)
-        self.numGems += item_gems
-        self.numCrystals += item_crystals
-        self.numDiamonds += item_diamonds
+        cur_item = Item.get(item_idx)
+        item_price = (cur_item.numGems, cur_item.numCrystals, cur_item.numDiamonds)
+        self.numGems += cur_item.numGems
+        self.numCrystals += cur_item.numCrystals
+        self.numDiamonds += cur_item.numDiamonds
         return self.inventory.dropItem(item_idx)
