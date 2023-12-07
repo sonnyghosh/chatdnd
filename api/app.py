@@ -8,10 +8,10 @@ from aiapi import generateStoryResponse
 app = Flask(__name__, template_folder='templates')
 CORS(app)
 # Initialize Firestore DB
-cred = credentials.Certificate('key.json')
-default_app = initialize_app(cred)
-db = firestore.client()
-todo_ref = db.collection('todos')
+# cred = credentials.Certificate('key.json')
+# default_app = initialize_app(cred)
+# db = firestore.client()
+# todo_ref = db.collection('todos')
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -87,23 +87,23 @@ def delete():
         return f"An Error Occurred: {e}"
 
 
-@app.route('/game', methods=['GET', 'POST'])
-def game():
-    if request.method == 'GET':
-        return render_template('game.html')  # You need to create a corresponding HTML template.
+# @app.route('/game', methods=['GET', 'POST'])
+# def game():
+#     if request.method == 'GET':
+#         return render_template('game.html')  # You need to create a corresponding HTML template.
 
-    elif request.method == 'POST':
-        user_input = request.form.get('user_input')  # Assuming a form field named 'user_input'
-        context += '\n'+user_input
-        # Pass the user input to your AI function
-        ai_response = generateStoryResponse(user_input)
+#     elif request.method == 'POST':
+#         user_input = request.form.get('user_input')  # Assuming a form field named 'user_input'
+#         context += '\n'+user_input
+#         # Pass the user input to your AI function
+#         ai_response = generateStoryResponse(user_input)
         
-        # You can then pass the response to the template or format it as needed
-        return render_template('game.html', result=ai_response)
+#         # You can then pass the response to the template or format it as needed
+#         return render_template('game.html', result=ai_response)
 
-    # Handle other HTTP methods if necessary
-    else:
-        return "Method not allowed"
+#     # Handle other HTTP methods if necessary
+#     else:
+#         return "Method not allowed"
     
 if __name__ == '__main__':
     app.run(threaded=True, host='0.0.0.0', port=5000, debug=True)
