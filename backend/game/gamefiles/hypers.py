@@ -4,7 +4,7 @@ import json
 PlayerStat = g_vars.PlayerStat
 ItemType = g_vars.ItemType
 
-HYPERS_FILE = './api/game/gamefiles/hypers.json'
+HYPERS_FILE = './backend/game/gamefiles/hypers.json'
 
 item_hypers = {
     ItemType.potion : 0.3,

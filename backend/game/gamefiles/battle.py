@@ -12,7 +12,8 @@ item_hypers, player_hypers, meta_params = hypers.load_hypers()
 convert = {'pass': 3, 'attack': 0, 'use': 1, 'give': 2}
 verbose = g_vars.config['meta']['verbose']
 
-model = AI.Agent()
+model_Auto = AI.Agent(idx=0)
+model_Enemy = AI.Agent(idx=3)
 
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -98,10 +99,10 @@ class Battle:
             addon = '\n - To give an item to a party member type "give"'
 
         prompt = f'{player.name}\'s turn!\nHere is {player.name}\'s redout:\n{player}\n - To attack type "attack"\n - To use an item type "use (Item type #)"\n - To regen HP, MP, and STA type "pass"{addon}\nAction: '
-        action = prompt_user(prompt=prompt, invalid=lambda x: x not in balance_dict['player']['possible_actions'] and len(x.split()) < 2)
+        action = prompt_user(prompt=prompt, invalid=lambda x: x not in balance_dict['player']['human_actions'] and len(x.split()) < 2)
 
         if action == 'pass':
-            return item.Pass, None
+            return action, item.Pass, None
         
         elif action == 'attack':
             weapon_type = prompt_user(f'Would you like to use:\n[0] Melee Weapon\n[1] Ranged Weapon\nEnter selection: ', 
@@ -111,6 +112,7 @@ class Battle:
 
             prompt = f'{player.get_item_type_str(weapon_type, spacer="", numbered=True)}-1. Fist - use base attack stat [ {player.stats[PlayerStat.attack]} ATK ]\nPlease Select a weapon to use: '
             weapon = prompt_user(prompt=prompt, invalid=lambda x: x not in range(-1,len(weapon_choice)), fn=lambda x: int(x))
+            weapon = weapon_choice[weapon]
             
             if len(op_party) > 1:
                 prompt = op_toggle.get_party_members_names() + '\nWho would you like to attack? Enter the number of the character: '
@@ -120,7 +122,7 @@ class Battle:
                 target = op_party[0]
             if not debug:
                 clr_t()
-            return weapon, target
+            return action, weapon, target
         
         elif action == 'use':
             item_type = prompt_user('[0]: Potion\n[1]: Magic\nWhich would you like to use: ', 
@@ -229,10 +231,14 @@ class Battle:
             
             # random action for bot
             else:
-                if False:
+                if mode in ['auto']:
                     state = {'player': player, 'friends': toggle, 'enemies': op_toggle}
-                    action, thing, target = model.make_move(state)
+                    action, thing, target = model_Auto.make_move(state)
                     assert False if action == 2 and thing.type == ItemType.melee and thing.uses == -99 else True, f'Ai tried to trade fist: {action}, {thing}' 
+                elif mode in ['enemy']:
+                    state = {'player': player, 'friends': toggle, 'enemies': op_toggle}
+                    action, thing, target = model_Enemy.make_move(state)
+                    assert False if action == 2 and thing.type == ItemType.melee and thing.uses == -99 else True, f'Ai tried to trade fist: {action}, {thing}'
                 else:
                     action = random.choices(balance_dict['player']['possible_actions'], weights=balance_dict['player']['action_weight'])[0]
 

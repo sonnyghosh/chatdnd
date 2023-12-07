@@ -80,7 +80,8 @@ config = {
         },
         'player': {
             "possible_actions" : [0, 1, 2, 3],
-            "action_weight": [0.5, 0.3, 0.1, 0.1]
+            "action_weight": [0.5, 0.3, 0.1, 0.1],
+            "human_actions": ['attack', 'use', 'give', 'pass']
         },
         'item': {
             'magic_weights' : [0.5, 0.2, 0.1, 0.1, 0.1],

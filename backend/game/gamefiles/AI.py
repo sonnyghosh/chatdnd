@@ -11,17 +11,21 @@ ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 pass_item = item.Pass
 fist_item = item.Fist
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-def train_model(X, y):
+def train_model(X, y, model=None):
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-    
+    print(sum(y_test)/len(y_test))
+    print(max(y_test), min(y_test))
     # Train model
-    model = DecisionTreeRegressor()
+    if not model:
+        #model = RandomForestRegressor(n_estimators=8, max_depth=10) # 0.52 R^2
+        model = GradientBoostingRegressor(n_estimators=20, max_depth=10) # 0.56 R^2
     model.fit(X_train, y_train)
     
     # Evaluate model
@@ -38,21 +42,21 @@ def train_model(X, y):
         diff = b-a
         if abs(diff) > max_diff:
             max_diff = diff
-    print(max_diff)
+    print('largest Error:', max_diff)
     return model
 
-def save_model(model):
-    with open('./api/game/gamefiles/models/DTR_2_model.pkl', 'wb') as f:
+def save_model(model, loc):
+    with open(loc, 'wb') as f:
         pickle.dump(model, f)
     
-def load_model():
-    with open('./api/game/gamefiles/models/DTR_2_model.pkl', 'rb') as f:
+def load_model(idx=0):
+    with open(f'./backend/game/gamefiles/models/DTR_{idx}_model.pkl', 'rb') as f:
         return pickle.load(f)
-
+        
 class Agent:
 
-    def __init__(self):
-        self.model = load_model()
+    def __init__(self, idx):
+        self.model = load_model(idx)
 
     def make_move(self, state):
         player = state['player']
@@ -107,17 +111,22 @@ class Agent:
         move_idx = min(len(moves)-1, random.randint(0,4))
         return moves[move_idx][0]
 
+def train_loop(files):
+    model = None
+    for file in files:
+        data_parse = save_load.DataSaverLoader(file)
+        X, Y = data_parse.load_data()
+        model = train_model(X, Y, model)
+    return model
+
+
 
 if __name__ == '__main__':
-    train_dataset_file = "./api/game/gamefiles/data/train_dataset.txt"
-    #test_dataset_file = "./api/game/gamefiles/data/test_dataset.txt"
-    train_data_parser = save_load.DataSaverLoader(train_dataset_file)
-    #test_data_parser = save_load.DataSaverLoader(test_dataset_file)
-    X_train, Y_train = train_data_parser.load_data()
-    #X_test, Y_test = test_data_parser.load_data()
-    model = train_model(X_train, Y_train)
+    model = train_loop(["./backend/game/gamefiles/data/all_levels/train_dataset_%i.txt" % x for x in range(4,5)])
+    
+
     #Y_hat = model.predict(X_test)
-    save_model(model=model)
+    save_model(model=model, loc='./backend/game/gamefiles/models/DTR_3_model.pkl')
     #mse = mean_squared_error(Y_test, Y_hat)
     #mae = mean_absolute_error(Y_test, Y_hat)
     #r2 = r2_score(Y_test, Y_hat)

@@ -49,18 +49,24 @@ def test_game_auto(level=50, party_size = 1, num_games=200, testing=False):
     assert master_stats['Player']['Wins'] + master_stats['Enemy']['Wins'] == num_games , 'Too many games'
     assert 0.65 >= master_stats['Player']['Wins'] /num_games >= 0.35, f"W/L: {master_stats['Player']['Wins'] /num_games}"
     
-def auto_test_levels(party_size, num_games, num_levels):
-    master_stats = {ind : {'Player':{},'Enemy':{}} for ind in range(20, 91, int(70/num_levels))}
+def auto_test_levels(party_size, num_games, levels):
+    master_stats = {ind : {'Player':{},'Enemy':{}} for ind in levels}
+
+    if type(party) is tuple:
+        size_a = random.choice(party_size)
+        size_b = random.choice(party_size)
+    else:
+        size_a = party_size
+        size_b = party_size
 
     for level in master_stats.keys():
         print('Starting Level', level)
         #utils.clr_t()
         for idx in range(num_games):
-            print('game:',idx)
-            result, _, _ = test_game(party_size, level, generate_party=True)
+            #print('game:',idx)
+            result, _, _ = test_game(party_size=(size_a, size_b), level=(level, level+random.randint(-3,4)), generate_party=True)
             master_stats[level]['Player'] = utils.agg(master_stats[level]['Player'], result['Player'])
             master_stats[level]['Enemy'] = utils.agg(master_stats[level]['Enemy'], result['Enemy'])
-
 
     for level in master_stats.keys():
         print('Avg Level:', level, end='\n')
@@ -70,13 +76,27 @@ def auto_test_levels(party_size, num_games, num_levels):
     return master_stats
 
 if False:
-    for ps in range(1,6):
-        print(f'{ps} vs {ps}:')
-        auto_test_levels(party_size=ps, num_games=20, num_levels=7)
+    for ps in range(1,3):
+        pt_a = ps+1
+        print(f'{ps} vs {pt_a}:')
+        auto_test_levels(party_size=(ps, pt_a), num_games=60, levels=range(5,31, 5))
+
+    for ps in range(2,4):
+        pt_a = ps+1
+        print(f'{ps} vs {pt_a}:')
+        auto_test_levels(party_size=(ps, pt_a), num_games=40, levels=range(30,71, 5))
+
+    for ps in range(3,6):
+        pt_a = ps+1
+        print(f'{ps} vs {pt_a}:')
+        auto_test_levels(party_size=(ps, pt_a), num_games=20, levels=range(70,91, 5))
 
 if False:
     p_s = 3
-    lev = 1
+    lev = [10]
     num_g = 2
 
     cProfile.run('auto_test_levels(p_s, num_g, lev)')
+
+if __name__ == '__main__':
+    auto_test_levels(3, 10, [20, 50, 80])
