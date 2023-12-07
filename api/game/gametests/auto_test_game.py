@@ -10,7 +10,7 @@ from game.gamefiles import battle, party, g_vars, test_character
 from game.gametests import utils
 
 
-def test_game(party_size, level, generate_party):
+def test_game(party_size, level, generate_party, testing=False):
     st = {
         'Player':{},
         'Enemy':{}
@@ -29,19 +29,19 @@ def test_game(party_size, level, generate_party):
     st['Player'] = utils.agg(st['Player'], {'power':player_power})
     st['Enemy'] = utils.agg(st['Enemy'], {'power':enemy_power})
     current_battle = battle.Battle(player_party, enemy_party)
-    battle_stats = current_battle.start_game(auto_play=True, save_data=True) # make save data true to create dataset file link in utils
+    battle_stats = current_battle.start_game(auto_play=True, save_data=False) # make save data true to create dataset file link in utils
     st['Player'] = utils.agg(st['Player'], battle_stats[0])
     st['Enemy'] = utils.agg(st['Enemy'], battle_stats[1])
     return st, player_power/enemy_power, st['Player'].get('Wins', 0)
 
-def test_game_auto(level=50, party_size = 1, num_games=200):  
+def test_game_auto(level=50, party_size = 1, num_games=200, testing=False):  
     master_stats = {
         'Player':{},
         'Enemy':{}
     }
 
     for _ in range(num_games):
-        result,_,_ = test_game(party_size, level, generate_party=True)
+        result,_,_ = test_game(party_size, level, generate_party=True, testing=True)
         master_stats['Player'] = utils.agg(master_stats['Player'], result['Player'])
         master_stats['Enemy'] = utils.agg(master_stats['Enemy'], result['Enemy'])
 
@@ -69,7 +69,7 @@ def auto_test_levels(party_size, num_games, num_levels):
         utils.cross_stats(master_stats[level])
     return master_stats
 
-if True:
+if False:
     for ps in range(1,6):
         print(f'{ps} vs {ps}:')
         auto_test_levels(party_size=ps, num_games=20, num_levels=7)
