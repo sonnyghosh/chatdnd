@@ -229,7 +229,7 @@ class Battle:
             
             # random action for bot
             else:
-                if mode in ['auto', 'enemy']:
+                if mode in ['auto']:
                     state = {'player': player, 'friends': toggle, 'enemies': op_toggle}
                     action, thing, target = model.make_move(state)
                     assert False if action == 2 and thing.type == ItemType.melee and thing.uses == -99 else True, f'Ai tried to trade fist: {action}, {thing}' 

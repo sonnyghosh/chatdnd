@@ -34,7 +34,7 @@ def test_game(party_size, level, generate_party):
     st['Enemy'] = utils.agg(st['Enemy'], battle_stats[1])
     return st, player_power/enemy_power, st['Player'].get('Wins', 0)
 
-def test_game_auto(level=50, party_size = 1, num_games=200, testing=False):  
+def test_game_auto(level=50, party_size = 1, num_games=200):  
     master_stats = {
         'Player':{},
         'Enemy':{}
