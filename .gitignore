@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 api_env/
+config.py
 
 # firebase
 key.json
