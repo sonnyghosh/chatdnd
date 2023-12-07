@@ -2,6 +2,8 @@ from game.gamefiles import g_vars
 PlayerStat = g_vars.PlayerStat
 import os
 
+dataset_file = "./api/game/gamefiles/data/test_dataset.txt"
+
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')
 
@@ -84,29 +86,31 @@ def summarize(title, dicti, games=1):
     print(res)
 
 def cross_stats(stats):
-    pl = stats['Player']
-    en = stats['Enemy']
+    pl = stats.get('Player', {})
+    en = stats.get('Enemy', {})
     print('\nCross stats:')
     print('Player stats:')
-    print('give/move:', colorize(f'{round(pl["give"]/pl["moves"], ndigits=4)}', 'red' if pl["give"]/pl["moves"] > 0.1 else 'green'), end='\t')
-    print('pass/move:', colorize(f'{round(pl["pass"]/pl["moves"], ndigits=4)}', 'red' if pl["pass"]/pl["moves"] > 0.15 else 'green'), end='\t')
-    print('buff/move:', colorize(f'{round(pl["buff"]/pl["moves"], ndigits=4)}', 'red' if pl["buff"]/pl["moves"] > 0.3 else 'green'), end='\t')
-    print('magic/move:', colorize(f'{round(pl["magic"]/pl["moves"], ndigits=4)}', 'red' if pl["magic"]/pl["moves"] < 0.05 else 'green'), end='\t')
-    print('weapon/move:', colorize(f'{round(pl["weapon"]/pl["moves"], ndigits=4)}', 'red' if pl["weapon"]/pl["moves"] < 0.45 else 'green'), end='\t')
-    print('fist/move:', colorize(f'{round(pl["fist"]/pl["moves"], ndigits=4)}\n', 'red' if pl["fist"]/pl["moves"] > 0.1 else 'green'))
+    print('give/move:', colorize(f'{round(pl.get("give", 0)/pl.get("moves", 1), ndigits=4)}', 'red' if pl.get("give", 0)/pl.get("moves", 1) > 0.1 else 'green'), end='\t')
+    print('pass/move:', colorize(f'{round(pl.get("pass", 0)/pl.get("moves", 1), ndigits=4)}', 'red' if pl.get("pass", 0)/pl.get("moves", 1) > 0.15 else 'green'), end='\t')
+    print('buff/move:', colorize(f'{round(pl.get("buff", 0)/pl.get("moves", 1), ndigits=4)}', 'red' if pl.get("buff", 0)/pl.get("moves", 1) > 0.3 else 'green'), end='\t')
+    print('magic/move:', colorize(f'{round(pl.get("magic", 0)/pl.get("moves", 1), ndigits=4)}', 'red' if pl.get("magic", 0)/pl.get("moves", 1) < 0.05 else 'green'), end='\t')
+    print('weapon/move:', colorize(f'{round(pl.get("weapon", 0)/pl.get("moves", 1), ndigits=4)}', 'red' if pl.get("weapon", 0)/pl.get("moves", 1) < 0.45 else 'green'), end='\t')
+    print('fist/move:', colorize(f'{round(pl.get("fist", 0)/pl.get("moves", 1), ndigits=4)}\n', 'red' if pl.get("fist", 0)/pl.get("moves", 1) > 0.1 else 'green'))
 
     print('Enemy Stats:')
-    print('give/move:', colorize(f'{round(en["give"]/en["moves"], ndigits=4)}', 'red' if en["give"]/en["moves"] > 0.1 else 'green'), end='\t')
-    print('pass/move:', colorize(f'{round(en["pass"]/en["moves"], ndigits=4)}', 'red' if en["pass"]/en["moves"] > 0.15 else 'green'), end='\t')
-    print('buff/move:', colorize(f'{round(en["buff"]/en["moves"], ndigits=4)}', 'red' if en["buff"]/en["moves"] < 0.15 else 'green'), end='\t')
-    print('magic_atk/move:', colorize(f'{round(en["magic"]/en["moves"], ndigits=4)}', 'red' if en["magic"]/en["moves"] < 0.05 else 'green'), end='\t')
-    print('weapon/move:', colorize(f'{round(en["weapon"]/en["moves"], ndigits=4)}', 'red' if en["weapon"]/en["moves"] < 0.45 else 'green'), end='\t')
-    print('fist/move:', colorize(f'{round(en["fist"]/en["moves"], ndigits=4)}\n', 'red' if en["fist"]/en["moves"] > 0.1 else 'green'))
+    print('give/move:', colorize(f'{round(en.get("give", 0)/en.get("moves", 1), ndigits=4)}', 'red' if en.get("give", 0)/en.get("moves", 1) > 0.1 else 'green'), end='\t')
+    print('pass/move:', colorize(f'{round(en.get("pass", 0)/en.get("moves", 1), ndigits=4)}', 'red' if en.get("pass", 0)/en.get("moves", 1) > 0.15 else 'green'), end='\t')
+    print('buff/move:', colorize(f'{round(en.get("buff", 0)/en.get("moves", 1), ndigits=4)}', 'red' if en.get("buff", 0)/en.get("moves", 1) < 0.15 else 'green'), end='\t')
+    print('magic_atk/move:', colorize(f'{round(en.get("magic", 0)/en.get("moves", 1), ndigits=4)}', 'red' if en.get("magic", 0)/en.get("moves", 1) < 0.05 else 'green'), end='\t')
+    print('weapon/move:', colorize(f'{round(en.get("weapon", 0)/en.get("moves", 1), ndigits=4)}', 'red' if en.get("weapon", 0)/en.get("moves", 1) < 0.45 else 'green'), end='\t')
+    print('fist/move:', colorize(f'{round(en.get("fist", 0)/en.get("moves", 1), ndigits=4)}\n', 'red' if en.get("fist", 0)/en.get("moves", 1) > 0.1 else 'green'))
 
-    print('Avg Player Turns: ', pl['turns']/(pl['Wins'] + en['Wins']))
-    print('Avg Player Moves: ', pl['moves']/(pl['Wins'] + en['Wins']))
-    print(colorize('Player W/L:', 'white'), colorize(f'{round(pl["Wins"]/(pl["Losses"] + pl["Wins"]), ndigits=2)}', 'green' if 0.6 > pl["Wins"]/(pl["Losses"] + pl["Wins"]) > 0.4 else 'red'))
-    print(colorize('Enemy W/L:', 'white'), colorize(f'{round(en["Wins"]/(en["Losses"] + en["Wins"]), ndigits=2)}', 'green' if 0.6 > en["Wins"]/(en["Losses"] + en["Wins"]) > 0.4 else 'red'))
-    print('Player HP - Enemy ATK:', colorize(f'{pl[PlayerStat.health] - en[PlayerStat.attack]}', 'red' if pl[PlayerStat.health] - en[PlayerStat.attack] > 0 else 'green'))
-    print('Enemy HP - Player ATK:', colorize(f'{en[PlayerStat.health] - pl[PlayerStat.attack]}', 'red' if en[PlayerStat.health] - pl[PlayerStat.attack] > 0 else 'green'))
-    print('power level ratio:', colorize(f'{round(pl["power"]/en["power"], ndigits=2)}', 'green' if 1.2 > pl["power"]/en["power"] > 0.8 else 'red'))
+    print('Avg Player Turns: ', pl.get('turns', 0)/(pl.get('Wins', 1) + en.get('Wins', 0)))
+    print('Avg Player Moves: ', pl.get('moves', 0)/(pl.get('Wins', 1) + en.get('Wins', 0)))
+    print(colorize('Player W/L:', 'white'), colorize(f'{round(pl.get("Wins", 0)/(pl.get("Losses", 0) + pl.get("Wins", 1)), ndigits=2)}', 'green' if 0.6 > pl.get("Wins", 0)/(pl.get("Losses", 1) + pl.get("Wins", 1)) > 0.4 else 'red'))
+    print(colorize('Enemy W/L:', 'white'), colorize(f'{round(en.get("Wins", 0)/(en.get("Losses", 0) + en.get("Wins", 1)), ndigits=2)}', 'green' if 0.6 > en.get("Wins", 0)/(en.get("Losses", 1) + en.get("Wins", 1)) > 0.4 else 'red'))
+    print('Player HP - Enemy ATK:', colorize(f'{pl.get(PlayerStat.health, 0) - en.get(PlayerStat.attack, 0)}', 'red' if pl.get(PlayerStat.health, 0) - en.get(PlayerStat.attack, 0) > 0 else 'green'))
+    print('Enemy HP - Player ATK:', colorize(f'{en.get(PlayerStat.health, 0) - pl.get(PlayerStat.attack, 0)}', 'red' if en.get(PlayerStat.health, 0) - pl.get(PlayerStat.attack, 0) > 0 else 'green'))
+    print('power level ratio:', colorize(f'{round(pl.get("power", 0)/en.get("power", 1), ndigits=2)}', 'green' if 1.2 > pl.get("power", 0)/en.get("power", 1) > 0.8 else 'red'))
+
+

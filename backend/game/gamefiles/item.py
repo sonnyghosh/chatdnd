@@ -92,6 +92,21 @@ class Item:
         else:
             return {}
 
+    def get_inputs(self):
+        state = {
+            PlayerStat.attack: 0,
+            PlayerStat.defense: 0,
+            PlayerStat.charisma: 0,
+            PlayerStat.intelligence: 0,
+            PlayerStat.wisdom: 0,
+            PlayerStat.stamina: 0,
+            PlayerStat.mana: 0,
+            PlayerStat.health: 0,
+        }
+        for key, val in self.effects.items():
+            state[key] = val
+        return [val for val in state.values()] + [self.type.value]
+
 def generate_items(n_items, level):
     bag = {
         ItemType.potion:[],   # potions
@@ -146,6 +161,8 @@ def generate_items(n_items, level):
         bag[g_vars.ItemType(ind)].append(item.Item(item_name, item_uses, item_effects))
     return bag
     
+Fist = Item(ItemType.melee, -99, {PlayerStat.attack:0})
+Pass = Item(ItemType.none, -99, {})
 # Example usage:
 # health_potion = GameItem("Health Potion", 3, {'health': 20})
 # result = health_potion.use()
