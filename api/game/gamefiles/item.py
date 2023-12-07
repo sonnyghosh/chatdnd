@@ -161,7 +161,7 @@ def generate_items(n_items, level):
         bag[g_vars.ItemType(ind)].append(item.Item(item_name, item_uses, item_effects))
     return bag
     
-Fist = Item(ItemType.melee, -99, {})
+Fist = Item(ItemType.melee, -99, {PlayerStat.attack:0})
 Pass = Item(ItemType.none, -99, {})
 # Example usage:
 # health_potion = GameItem("Health Potion", 3, {'health': 20})

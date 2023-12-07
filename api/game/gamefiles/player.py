@@ -54,7 +54,7 @@ class Player:
         self.name = attr['name']
         self.stats = stats
         self.attr = attr
-        self.items = items
+        self.items : list = items
         self.usable_items = True
         self.get_rank()
     
@@ -111,6 +111,13 @@ class Player:
 
     def get_item_type(self, itemtype):
         return [w for w in self.items[itemtype] if ( w.uses != 0 and abs(w.effects.get(PlayerStat.stamina, 0)) <= self.attr[PlayerStat.stamina] and abs(w.effects.get(PlayerStat.mana, 0)) <= self.attr[PlayerStat.mana] )]
+
+    def get_top_n_item(self, itemtype, n):
+        items = self.get_item_type(itemtype)
+        if len(items) > 0:
+            return items[0: min(len(items), n)]
+        else:
+            return items
 
     def __str__(self) -> str:
         # print out the name of the player
@@ -198,7 +205,7 @@ class Player:
                     self_damage = target.stats[PlayerStat.attack]//2
                     self.attr[PlayerStat.health] = max(0, self.attr[PlayerStat.health] - self_damage)
                     if verbose:
-                        print(f'{target.name} Critically Reversed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health)}')
+                        print(f'{target.name} Critically Reversed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health.color().value)}')
                 else:
                     damage = 0
                     if verbose:
@@ -304,7 +311,7 @@ class Player:
         
         if item.uses == 0 and item in self.items[item.type]:
             self.items[item.type].remove(item)
-
+        self.sort_inv()
         return effects
 
     def give(self, item: item.Item, target: 'Player'):
