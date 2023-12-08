@@ -23,7 +23,7 @@ class Item:
     """
     inf_char = '∞'
 
-    def __init__(self, name, uses, effects):
+    def __init__(self, name, type, uses, effects):
         """
         Initializes a new Item.
 
@@ -33,10 +33,11 @@ class Item:
         - uses (int): The initial number of uses the item has.
         - effects (dict): A dictionary representing the effects of the item on game stats.
         """
-        self.type: g_vars.ItemType = name
+        self.name = name
+        self.type: g_vars.ItemType = type
         self.uses: int = uses
         self.effects: dict = effects
-        self.get_rank()
+        self.rank = self.get_rank()
 
     def get_rank(self):
         new_rank = 0
