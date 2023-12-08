@@ -1,16 +1,15 @@
 from dataclasses import dataclass, field, asdict
 import json
 
-from . import db
-from utils import generate_id
+from utils import generate_id, db
 
 @dataclass
 class Item:
     item_id : str = field(init=False, default_factory=generate_id)
     name : str
-    price : float
-    re_sell_modifier : float
-    minimum_price : float
+    priceCrystals : float
+    priceGems : float
+    priceDiamonds : float
     weight : float
     
     @classmethod
@@ -20,22 +19,24 @@ class Item:
             item = items_ref.document(item_id).get()
             if item.exists:
                 item_df = item.to_dict()
-                item_result = cls(item_df["name"], item_df["price"], item_df["re_sell_modifier"], item["minimum_price"], item["weight"])
+                item_result = cls(item_df["name"], item_df["priceCrystals"], item_df["priceGems"], item_df["priceDiamonds"], item_df["re_sell_modifier"], item["minimum_price"], item["weight"])
                 item_result.id = item_id
                 return item_result, 200
             return "Item not found", 404
         except:
-           return {
-               "id" : "none"
-           }
+           return "server error", 500
 
     @staticmethod
-    def add(item):
-        item_dict = asdict(item)
-        item_json = json.dump(item_dict)
-        try:
-            item_ref = db.collection('items')
-            item_ref.document(item.item_id).set(item_json)
-            return True, 200
-        except:
-            return False, 404
+    def create(cls, item_df):
+        result = cls(**item_df)
+        item_ref = db.collection('items')
+        item_ref.document(result.item_id).set(asdict(result))
+        return result, 200
+    
+    def update(self, update_fields):
+        item_df = asdict(self)
+        for k, v in item_df.keys():
+            item_df[k] = v
+        item_ref = db.collection("items").document(self.item_id)
+        item_ref.update(update_fields) 
+        return self, 200

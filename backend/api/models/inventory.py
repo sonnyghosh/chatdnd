@@ -2,8 +2,7 @@ from dataclasses import dataclass, field
 
 from item import Item
 from character import Character
-from utils import generate_id
-from . import db
+from utils import generate_id, db
 
 @dataclass
 class Inventory:
@@ -12,7 +11,7 @@ class Inventory:
     current_weight : float
     num_items : int
     item_ids : list[str] = field(default_factory=list)
-    owner : Character
+    owner_id : str
 
     def storeItem(self, item_idx):
         item, _ = Item.get(item_idx)
@@ -49,6 +48,19 @@ class Inventory:
         try:
             inventory_ref = db.collection("inventory").document(self.inventory_id)
             inventory_ref.update(update_fields)
-            return True, 200
+            return self, 200
         except:
             return False, 404
+    
+    @classmethod
+    def get(cls, inventory_id : str):
+        try:
+            inventory_ref = db.collection('inventory')
+            inventory = inventory_ref.document(inventory_id).get()
+            if inventory.exists:
+                inventory_df = inventory.to_dict()
+                inventory_result = Inventory(inventory_df['weight_limit'], inventory_df['current_weight'], inventory_df['num_items'], inventory_df['item_ids'], inventory_df['owner'])
+                return inventory_result, 200
+            return "Item not found", 400
+        except:
+            return "server error", 500
