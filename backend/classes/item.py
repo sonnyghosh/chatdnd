@@ -6,6 +6,8 @@ ItemType = g_vars.ItemType
 balance_dict = g_vars.config['balance']
 item_hypers, player_hypers, meta_params = hypers.load_hypers()
 
+from utils import db, generate_id
+
 class Item:
     """
     Represents an item in a video game.
@@ -124,9 +126,9 @@ class Item:
 
     @staticmethod
     def create(cls, item_df):
-        result = cls(**item_df)
+        result = cls(**item_df) #TODO - change this to something else
         item_ref = db.collection('items')
-        item_ref.document(result.item_id).set(asdict(result))
+        item_ref.document(result.item_id).set(asdict(result)) #TODO - get rid of the asdict() or create __dict__ function
         return result, 200
 
     def update(self, update_fields):
