@@ -1,4 +1,4 @@
-from . import player
+from . import player, class_utils
 from backend.game.gamefiles import g_vars
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
@@ -6,6 +6,7 @@ StatColor = g_vars.StatColor
 config = g_vars.config
 from game.gametests import utils
 import random
+db = class_utils.db
 
 from .class_utils import generate_id
 
@@ -22,6 +23,7 @@ class Party:
         self.party_id = generate_id()
         self.name = name
         self.players = members
+        self.id = class_utils.generate_id()
     
     def validate_party(self):
         for mem in self.players:
@@ -64,6 +66,11 @@ class Party:
     def get_inputs(self):
         arrs = [pl.get_inputs() for pl in self.get_alive_players()]
         return average_arrays(arrs) + [self.get_power_level()] 
+    
+    def asdict(self):
+        return {'name': self.name, 'players': self.players, 'id': self.id}
+
+    # TODO: add in a buy item and assign item function
 
 names = ["Blaze", "Rebel", "Ace", "Rogue", "Phoenix", "Echo", "Zenith", "Valor", "Cipher", "Nova", "Trinity", "Neo", "Onyx", "Astra", "Azure", "Bex", "Briar", "Cove", "Halo", "Ivory", "Jupiter", "Kai", "Lev", "Nyx", "Reign", "Rune", "Wren", "Zephyr"]
 
