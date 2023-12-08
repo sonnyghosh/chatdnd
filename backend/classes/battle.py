@@ -1,5 +1,6 @@
 import random
 from . import item, class_utils
+generate_id, db = class_utils.generate_id, class_utils.db
 from backend.game.gamefiles import g_vars, hypers, AI, save_load
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
@@ -7,7 +8,6 @@ StatColor = g_vars.StatColor
 import os
 import time
 from game.gametests import utils
-from .class_utils import generate_id, db
 save_location = utils.dataset_file
 balance_dict = g_vars.config['balance']
 item_hypers, player_hypers, meta_params = hypers.load_hypers()
