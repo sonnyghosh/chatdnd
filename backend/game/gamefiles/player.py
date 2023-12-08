@@ -184,32 +184,32 @@ class Player:
                     target.attr[PlayerStat.stamina] = max(0, block[PlayerStat.stamina] + target.attr[PlayerStat.stamina])
             damage = max(5, damage)
             # chance for critical hit based on roll
+            mult = round(random.random() + 1.1, ndigits=2)
             if attacker_roll == -2:
-                damage *= 2
+                damage *= mult
                 if target_roll == -1:
-                    damage *= 2
+                    damage *= mult
                     if verbose:
-                        print(utils.colorize("Critical Hit, while off guard! 4x damage", ['bold', 'red', 'on_black']))
+                        print(utils.colorize(f"Critical Hit, while off guard! {mult*mult}x damage", ['bold', 'red', 'on_black']))
                 
                 elif target_roll == -2:
-                    damage /= 2
+                    damage /= mult
                     if verbose:
                         print(utils.colorize("Critical Hit and Block! 1x damage", ['bold', 'red', 'on_black']))
-
                 else:
                     if verbose:
-                        print(utils.colorize("Critical Hit! 2x damage", ['bold', 'red', 'on_black']))
+                        print(utils.colorize(f"Critical Hit! {mult}x damage", ['bold', 'red', 'on_black']))
 
             elif attacker_roll == -1:
                 if target_roll == -2 and not range_weapon:
-                    self_damage = target.stats[PlayerStat.attack]//2
+                    self_damage = target.stats[PlayerStat.attack]//mult
                     self.attr[PlayerStat.health] = max(0, self.attr[PlayerStat.health] - self_damage)
                     if verbose:
                         print(f'{target.name} Critically Reversed {self.name}\'s attack! {self.name} lost {utils.colorize(f"{self_damage} HP", PlayerStat.health.color().value)}')
                 else:
                     damage = 0
                     if verbose:
-                        print(utils.colorize('Attacker Epic Miss!', ['bold', 'red', 'on_black']))
+                        print(utils.colorize('Attacker Epic Miss! No Damage!', ['bold', 'red', 'on_black']))
 
             target.attr[PlayerStat.health] = max(0, target.attr[PlayerStat.health] - damage) # Apply damage 
             sta_degredation = min(0, effects.get(PlayerStat.stamina, 0))
@@ -233,18 +233,17 @@ class Player:
 
                 damage = self.stats[PlayerStat.attack] # Calculate base damage 
                 damage += effects.get(PlayerStat.attack, 0)   # Add damage effects from item
+                damage -= player.stats[PlayerStat.defense] # Reduce damage based on target's defense 
+                damage = max(5, damage) # Make sure damage is at least 1
 
                 if attacker_role == -2:
                     damage *= 2
                     if verbose:
                         print("Critical hit!")
                 elif attacker_role == -1:
-                    damage //= 2
+                    damage = 0
                     if verbose:
-                        print(f'{player} fialed to cast spell')
-
-                damage -= player.stats[PlayerStat.defense] # Reduce damage based on target's defense 
-                damage = max(1, damage) # Make sure damage is at least 1
+                        print(f'{player} missed their spell!')
 
                 if target_role == -2:
                     damage == 0
@@ -340,12 +339,19 @@ def generate_player(name, level=None):
     }
 
     stats = {
-        PlayerStat.attack: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
-        PlayerStat.defense: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
-        PlayerStat.charisma: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
-        PlayerStat.intelligence: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75)))),
-        PlayerStat.wisdom: min(50,int(random.randint(1+int(attr[PlayerStat.level]/5),1+int(attr[PlayerStat.level]/1.75))))
+        PlayerStat.attack: 0,
+        PlayerStat.defense: 0,
+        PlayerStat.charisma: 0,
+        PlayerStat.intelligence: 0,
+        PlayerStat.wisdom: 0
     }
 
-    items = item.generate_items(random.randint(12,18), attr[PlayerStat.level])
+    for i in range(2*attr[PlayerStat.level]):
+        choice = random.choice(list(stats.keys()))
+        if stats[choice] < 50:
+            stats[choice] += 1
+        else:
+            i -= 1
+
+    items = item.generate_items(random.randint(14,18), attr[PlayerStat.level])
     return Player(stats=stats, attr=attr, items=items).sort_inv()

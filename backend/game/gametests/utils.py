@@ -2,7 +2,7 @@ from game.gamefiles import g_vars
 PlayerStat = g_vars.PlayerStat
 import os
 
-dataset_file = "./backend/game/gamefiles/data/all_levels/train_dataset_4.txt"
+dataset_file = "./backend/game/gamefiles/data/all_levels/train_dataset_2.txt"
 
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')

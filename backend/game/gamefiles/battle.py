@@ -12,8 +12,8 @@ item_hypers, player_hypers, meta_params = hypers.load_hypers()
 convert = {'pass': 3, 'attack': 0, 'use': 1, 'give': 2}
 verbose = g_vars.config['meta']['verbose']
 
-model_Auto = AI.Agent(idx=0)
-model_Enemy = AI.Agent(idx=3)
+model_Auto = AI.Agent(idx=6)
+model_Enemy = AI.Agent(idx=6)
 
 def clr_t():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -112,7 +112,10 @@ class Battle:
 
             prompt = f'{player.get_item_type_str(weapon_type, spacer="", numbered=True)}-1. Fist - use base attack stat [ {player.stats[PlayerStat.attack]} ATK ]\nPlease Select a weapon to use: '
             weapon = prompt_user(prompt=prompt, invalid=lambda x: x not in range(-1,len(weapon_choice)), fn=lambda x: int(x))
-            weapon = weapon_choice[weapon]
+            if weapon == -1:
+                weapon = item.Fist
+            else:
+                weapon = weapon_choice[weapon]
             
             if len(op_party) > 1:
                 prompt = op_toggle.get_party_members_names() + '\nWho would you like to attack? Enter the number of the character: '

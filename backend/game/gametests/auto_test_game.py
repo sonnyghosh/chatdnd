@@ -52,19 +52,18 @@ def test_game_auto(level=50, party_size = 1, num_games=200, testing=False):
 def auto_test_levels(party_size, num_games, levels):
     master_stats = {ind : {'Player':{},'Enemy':{}} for ind in levels}
 
-    if type(party) is tuple:
-        size_a = random.choice(party_size)
-        size_b = random.choice(party_size)
-    else:
-        size_a = party_size
-        size_b = party_size
-
     for level in master_stats.keys():
         print('Starting Level', level)
         #utils.clr_t()
         for idx in range(num_games):
             #print('game:',idx)
-            result, _, _ = test_game(party_size=(size_a, size_b), level=(level, level+random.randint(-3,4)), generate_party=True)
+            if type(party_size) is tuple:
+                size_a = random.choice(party_size)
+                size_b = random.choice(party_size)
+            else:
+                size_a = party_size
+                size_b = party_size
+            result, _, _ = test_game(party_size=(size_a, size_b), level=(level, level), generate_party=True)
             master_stats[level]['Player'] = utils.agg(master_stats[level]['Player'], result['Player'])
             master_stats[level]['Enemy'] = utils.agg(master_stats[level]['Enemy'], result['Enemy'])
 
@@ -79,17 +78,17 @@ if False:
     for ps in range(1,3):
         pt_a = ps+1
         print(f'{ps} vs {pt_a}:')
-        auto_test_levels(party_size=(ps, pt_a), num_games=60, levels=range(5,31, 5))
+        auto_test_levels(party_size=(ps, pt_a), num_games=40, levels=range(5,31, 5))
 
     for ps in range(2,4):
         pt_a = ps+1
         print(f'{ps} vs {pt_a}:')
-        auto_test_levels(party_size=(ps, pt_a), num_games=40, levels=range(30,71, 5))
+        auto_test_levels(party_size=(ps, pt_a), num_games=30, levels=range(30,61, 5))
 
     for ps in range(3,6):
         pt_a = ps+1
         print(f'{ps} vs {pt_a}:')
-        auto_test_levels(party_size=(ps, pt_a), num_games=20, levels=range(70,91, 5))
+        auto_test_levels(party_size=(ps, pt_a), num_games=20, levels=range(60,91, 5))
 
 if False:
     p_s = 3
@@ -99,4 +98,4 @@ if False:
     cProfile.run('auto_test_levels(p_s, num_g, lev)')
 
 if __name__ == '__main__':
-    auto_test_levels(3, 10, [20, 50, 80])
+    auto_test_levels(3, 20, [20, 50, 80])

@@ -57,11 +57,11 @@ class Item:
         """
         # Define valid ranges for each stat
         valid_ranges = {
-            PlayerStat.attack: range(-50, 31),
-            PlayerStat.defense: range(1, 31),
-            PlayerStat.charisma: range(1, 31),
-            PlayerStat.intelligence: range(1, 31),
-            PlayerStat.wisdom: range(1, 31),
+            PlayerStat.attack: range(-50, 36),
+            PlayerStat.defense: range(1, 36),
+            PlayerStat.charisma: range(1, 36),
+            PlayerStat.intelligence: range(1, 36),
+            PlayerStat.wisdom: range(1, 36),
             PlayerStat.health: range(1,101),
             PlayerStat.mana: range(-50,101),
             PlayerStat.level: range(0,2),
@@ -130,22 +130,22 @@ def generate_items(n_items, level):
         elif ind == ItemType.magic:
             item_name = ind
             item_uses = -99#random.randint(int(level/5),int(level/2))
-            effect_bonus = max(2,min(30,random.randint(int(level/10),int(level/3))))
+            effect_bonus = max(2,min(35,random.randint(int(level/8),int(level/3.5))))
             side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
             item_effects = {random.choices(g_vars.choices[item_name], weights=balance_dict['item']['magic_weights'])[0]: effect_bonus, PlayerStat.mana: side_effect}
 
         # generate melee
         elif ind == ItemType.melee:
             item_name = ind
-            item_uses = random.randint(int(level/5),int(level/4))
-            effect_bonus = max(2,min(30,random.randint(int(level/5),int(level/2.5))))
+            item_uses = random.randint(int(level/6),int(level/4))
+            effect_bonus = max(2,min(35,random.randint(int(level/5),int(level/2.5))))
             side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
             item_effects = {PlayerStat.attack: effect_bonus,PlayerStat.stamina: side_effect}
 
         # generate ranged
         elif ind == ItemType.ranged:
             item_name = ind
-            item_uses = random.randint(int(level/5),int(level/4))
+            item_uses = random.randint(int(level/6),int(level/4))
             effect_bonus = max(2,min(30,random.randint(int(level/5),int(level/2.5))))
             side_effect = int(-effect_bonus * (random.random()*0.5+0.25))
             item_effects = {PlayerStat.attack: effect_bonus,PlayerStat.stamina: side_effect}
