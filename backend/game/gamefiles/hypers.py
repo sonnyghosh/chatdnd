@@ -1,4 +1,4 @@
-from game.gamefiles import g_vars
+from backend.game.gamefiles import g_vars
 import random
 import json
 PlayerStat = g_vars.PlayerStat

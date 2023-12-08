@@ -3,9 +3,11 @@ import sys
 import os
 CURRENT_DIR = os.path.dirname(__file__)
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
-sys.path.append(os.path.dirname(PARENT_DIR))
-from game.gamefiles import battle, party
-from game.gametests import utils
+G_PARENT_DIR = os.path.dirname(PARENT_DIR)
+sys.path.append(os.path.dirname(G_PARENT_DIR))
+
+from backend.classes import battle, party
+from backend.game.gametests import utils
 
 player_party = party.generate_party(2, 'Dike Tyson\'s Squad', avg_level=100)
 print(player_party.get_inputs())

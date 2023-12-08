@@ -1,4 +1,5 @@
-from . import player, g_vars
+from . import player
+from backend.game.gamefiles import g_vars
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor

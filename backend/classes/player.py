@@ -1,5 +1,6 @@
 import random
-from . import item, g_vars, hypers
+from . import item
+from backend.game.gamefiles import g_vars, hypers
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor
@@ -54,12 +55,12 @@ class Player:
         self.name = attr['name']
         self.stats = stats
         self.attr = attr
-        self.items : list = items
+        self.items : dict = items
         self.usable_items = True
         self.get_rank()
     
     def get_rank(self):
-        if self.attr[PlayerStat.health] > 0:
+        if self.attr.get(PlayerStat.health,0) > 0:
             stat_rank = sum([player_hypers[key] * val for key, val in self.stats.items()])/max(1,len(self.stats.values()))
             items_rank = sum([sum([i.rank for i in it])/max(1,len(it)) for it in self.items.values()])/max(1,len(self.items))
             attr_rank = sum([player_hypers[key] * att for key, att in self.attr.items() if key != 'name'])/(len(self.attr)-1)

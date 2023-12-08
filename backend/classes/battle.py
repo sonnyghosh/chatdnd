@@ -1,5 +1,6 @@
 import random
-from . import item, g_vars, hypers, AI, save_load
+from . import item
+from backend.game.gamefiles import g_vars, hypers, AI, save_load
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 StatColor = g_vars.StatColor

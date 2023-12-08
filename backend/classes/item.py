@@ -1,5 +1,6 @@
 import random
-from . import g_vars, item, hypers
+from . import item
+from backend.game.gamefiles import g_vars, hypers
 PlayerStat = g_vars.PlayerStat
 ItemType = g_vars.ItemType
 balance_dict = g_vars.config['balance']

@@ -5,9 +5,12 @@ import cProfile
 from contextlib import redirect_stdout
 CURRENT_DIR = os.path.dirname(__file__)
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
-sys.path.append(os.path.dirname(PARENT_DIR))
-from game.gamefiles import battle, party, g_vars, test_character
-from game.gametests import utils
+G_PARENT_DIR = os.path.dirname(PARENT_DIR)
+sys.path.append(os.path.dirname(G_PARENT_DIR))
+
+from backend.classes import battle, party
+from backend.game.gamefiles import g_vars, test_character
+from backend.game.gametests import utils
 
 
 def test_game(party_size, level, generate_party, testing=False):
@@ -23,7 +26,7 @@ def test_game(party_size, level, generate_party, testing=False):
     else:
         player_party = test_character.Dike_Tyson_Party
         enemy_party = test_character.Enemy_Test_Party
-    
+
     player_power = player_party.get_power_level()
     enemy_power = enemy_party.get_power_level()
     st['Player'] = utils.agg(st['Player'], {'power':player_power})

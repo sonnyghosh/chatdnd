@@ -1,6 +1,5 @@
 import csv
 import sys
-from game.gametests import utils
 
 class DataSaverLoader:
     def __init__(self, savefile):

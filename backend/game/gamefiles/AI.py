@@ -4,9 +4,11 @@ import pickle
 import random
 CURRENT_DIR = os.path.dirname(__file__)
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
-sys.path.append(os.path.dirname(PARENT_DIR))
+G_PARENT_DIR = os.path.dirname(PARENT_DIR)
+sys.path.append(os.path.dirname(G_PARENT_DIR))
 
-from game.gamefiles import g_vars, hypers, save_load, item
+from backend.classes import item
+from backend.game.gamefiles import g_vars, hypers, save_load
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
 pass_item = item.Pass

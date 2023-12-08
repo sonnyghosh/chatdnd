@@ -1,4 +1,7 @@
-from game.gamefiles import party, player, item, g_vars
+
+from backend.classes import party, player, item
+from game.gamefiles import g_vars
+
 stats = g_vars.stats
 
 Dike_Tyson_Party = party.Party(members=[player.Player(stats={stats[0]: 41, stats[1]: 43, stats[2]: 39,stats[3]: 33,stats[4]: 31}, 

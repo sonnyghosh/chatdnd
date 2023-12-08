@@ -2,12 +2,14 @@ import sys
 import os
 CURRENT_DIR = os.path.dirname(__file__)
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
-sys.path.append(os.path.dirname(PARENT_DIR))
+G_PARENT_DIR = os.path.dirname(PARENT_DIR)
+sys.path.append(os.path.dirname(G_PARENT_DIR))
+
+from backend.classes import battle as battle_lib
+from backend.classes import party as party_lib
+from backend.classes import player as player_lib
 import pytest
-from game.gamefiles import battle as battle_lib
-from game.gamefiles import party as party_lib
-from game.gamefiles import player as player_lib
-from game.gamefiles import g_vars as gv
+from backend.game.gamefiles import g_vars as gv
 ItemType = gv.ItemType
 PlayerStat = gv.PlayerStat
 
