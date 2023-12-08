@@ -7,6 +7,7 @@ StatColor = g_vars.StatColor
 import os
 import time
 from game.gametests import utils
+from .class_utils import generate_id, db
 save_location = utils.dataset_file
 balance_dict = g_vars.config['balance']
 item_hypers, player_hypers, meta_params = hypers.load_hypers()
@@ -31,6 +32,7 @@ def prompt_user(prompt, invalid=lambda x : x=='attack', fn=lambda x: x):
 
 class Battle:
     def __init__(self, player_party, enemy_party):
+        self.battle_id = generate_id()
         self.player_party = player_party
         self.enemy_party = enemy_party
     
@@ -376,4 +378,39 @@ class Battle:
             if verbose:
                 print('Game Over')
             return p_stats, e_stats
-        
+    
+    @classmethod
+    def get(cls, battle_id : str):
+        battle_ref = db.collection('battles')
+        battle = battle_ref.document(battle_id).get()
+        if battle.exists:
+            battle_result = Battle(**battle)
+            return battle_result, 200
+        return False, 400
+
+    def update(self, update_fields):
+        try:
+            battle_df = self.asdict()
+            for k, v in battle_df:
+                battle_df[k] = v
+            battle_ref = db.collection("battles").document(self.battle_id)
+            battle_ref.update(update_fields)
+            return True
+        except:
+            return False
+    @classmethod    
+    def create(cls, battle_df):
+        result = cls(**battle_df)
+        character_ref = db.collection("battles")
+        character_ref.document(result.character_id).set(result.asdict())
+        return result, 200
+    
+    def delete(self):
+        db.collection("battles").document(self.battle_id).delete()
+
+    def asdict(self):
+        return {
+            "battle_id" : self.battle_id,
+            "player_party" : self.player_party.asdict(),
+            "enemy_party" : self.enemy_party.asdict()
+        }

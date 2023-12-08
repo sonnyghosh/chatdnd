@@ -7,6 +7,8 @@ config = g_vars.config
 from game.gametests import utils
 import random
 
+from .class_utils import generate_id
+
 def average_arrays(lists):
     result = []
     for i in range(len(lists[0])):
@@ -17,6 +19,7 @@ def average_arrays(lists):
 
 class Party:
     def __init__(self, members, name):
+        self.party_id = generate_id()
         self.name = name
         self.players = members
     
