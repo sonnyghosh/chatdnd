@@ -1,5 +1,6 @@
 import random
-from . import item
+from . import item, class_utils
+db = class_utils.db
 from backend.game.gamefiles import g_vars, hypers
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
@@ -57,7 +58,8 @@ class Player:
         self.attr = attr
         self.items : dict = items
         self.usable_items = True
-        self.get_rank()
+        self.rank = self.get_rank()
+        self.id = class_utils.generate_id()
     
     def get_rank(self):
         if self.attr.get(PlayerStat.health,0) > 0:
@@ -329,6 +331,48 @@ class Player:
 
     def get_inputs(self):
         return [val for val in self.stats.values()] + [val for key, val in self.attr.items() if key != 'name']
+
+    def asdict(self):
+        return {'name': self.name, 'stats': self.stats, 'attr': self.attr, 'items': self.items, 'usable_items': self.usable_items, 'rank': self.rank, 'id': self.id}
+
+    @classmethod
+    def get(cls, character_id : str):
+        try:
+            character_ref = db.collection('characters')
+            character = character_ref.document(character_id).get()
+            if character.exists:
+                character_df = character.asdict()
+                character_result = cls(**character_df)
+                character_result.character_id = character_id
+                return character_result, 200
+            return character_result, 404
+        except:
+            return character_result, 500
+    
+    def update(self, update_fields):
+        character_df = self.asdict()
+        for key, value in update_fields.keys():
+            character_df[key] = value
+        character_ref = db.collection("characters").document(self.character_id)
+        character_ref.update(update_fields)
+        return True
+    
+    @staticmethod
+    def delete(character_id):
+        try:
+            character_ref = db.collection("characters").document(character_id).delete()
+            return True, 200
+        except:
+            return False, 404
+
+    @classmethod
+    def create(cls, character_df):
+        # TODO create function; input character_df; turn into class and add to db server; return Character new_character
+        result = cls(**character_df)
+        character_ref = db.collection("characters")
+        character_ref.document(result.character_id).set(result.asdict())
+        return result, 200
+
 
 def generate_player(name, level=None):
     attr = {

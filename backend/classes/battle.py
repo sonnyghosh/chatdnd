@@ -1,5 +1,5 @@
 import random
-from . import item
+from . import item, class_utils
 from backend.game.gamefiles import g_vars, hypers, AI, save_load
 ItemType = g_vars.ItemType
 PlayerStat = g_vars.PlayerStat
@@ -31,6 +31,7 @@ def prompt_user(prompt, invalid=lambda x : x=='attack', fn=lambda x: x):
 
 class Battle:
     def __init__(self, player_party, enemy_party):
+        self.id = class_utils.generate_id()
         self.player_party = player_party
         self.enemy_party = enemy_party
     

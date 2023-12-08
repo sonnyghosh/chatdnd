@@ -1,5 +1,5 @@
 import random
-from . import item
+from . import item, class_utils
 from backend.game.gamefiles import g_vars, hypers
 PlayerStat = g_vars.PlayerStat
 ItemType = g_vars.ItemType
@@ -14,7 +14,7 @@ class Item:
 
     Attributes:
     - name (str): The name of the item.
-    - cat (int): The type of item 0-2.
+    - type (ItemType): The type of item 0-5.
     - uses (int): The number of uses the item has.
     - effects (dict): A dictionary representing the effects of the item on game stats.
 
@@ -38,6 +38,7 @@ class Item:
         self.uses: int = uses
         self.effects: dict = effects
         self.rank = self.get_rank()
+        self.id = class_utils.generate_id()
 
     def get_rank(self):
         new_rank = 0
@@ -117,7 +118,7 @@ class Item:
             items_ref = db.collection('items')
             item = items_ref.document(item_id).get()
             if item.exists:
-                item_df = item.to_dict()
+                item_df = item.asdict()
                 item_result = cls(item_df["name"], item_df["priceCrystals"], item_df["priceGems"], item_df["priceDiamonds"], item_df["re_sell_modifier"], item["minimum_price"], item["weight"])
                 item_result.id = item_id
                 return item_result, 200
@@ -129,17 +130,19 @@ class Item:
     def create(cls, item_df):
         result = cls(**item_df) #TODO - change this to something else
         item_ref = db.collection('items')
-        item_ref.document(result.item_id).set(asdict(result)) #TODO - get rid of the asdict() or create __dict__ function
+        item_ref.document(result.item_id).set(result.asdict()) #TODO - get rid of the asdict() or create __dict__ function
         return result, 200
 
     def update(self, update_fields):
-        item_df = asdict(self) # TODO - change the update to something else
+        item_df = self.asdict() # TODO - change the update to something else
         for k, v in item_df.keys():
             item_df[k] = v
         item_ref = db.collection("items").document(self.item_id)
         item_ref.update(update_fields) 
         return self, 200
 
+    def asdict(self):
+        return {'name': self.name, 'type': self.type, 'uses': self.uses, 'effects': self.effects, 'rank': self.rank, 'id': self.id}
 
 def generate_items(n_items, level):
     bag = {
