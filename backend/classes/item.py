@@ -36,7 +36,7 @@ class Item:
         self.type: g_vars.ItemType = name
         self.uses: int = uses
         self.effects: dict = effects
-        self.get_rank()
+        self.rank = self.get_rank()
 
     def get_rank(self):
         new_rank = 0
