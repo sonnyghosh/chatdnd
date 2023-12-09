@@ -34,6 +34,8 @@ def generateStoryResponse(prompt, context='', max_len=250):
         print(e)
         answer = 'cannot get response from API'
 
+    # TODO: parse out the message to find the options and the story
+
     return answer
 
 
