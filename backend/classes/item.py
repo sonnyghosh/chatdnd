@@ -5,8 +5,8 @@ PlayerStat = g_vars.PlayerStat
 ItemType = g_vars.ItemType
 balance_dict = g_vars.config['balance']
 item_hypers, player_hypers, meta_params = hypers.load_hypers()
-
-from utils import db, generate_id
+db = class_utils.db
+generate_id = class_utils.generate_id
 
 class Item:
     """
@@ -144,6 +144,14 @@ class Item:
     def asdict(self):
         return {'name': self.name, 'type': self.type, 'uses': self.uses, 'effects': self.effects, 'rank': self.rank, 'id': self.id}
 
+item_names = [
+    ["Elixir of Life", "Potion of Strength", "Healing Draught", "Invigorating Tonic", "Cloak of Invisibility"],
+    ["Fireball", "Ice Bolt", "Lightning Strike", "Healing Touch", "Shield of Faith"],
+    ["Iron Plate Armor", "Leather Armor", "Chainmail Armor", "Mage Robes", "Stealth Suit"],
+    ["Iron Sword", "Steel Sword", "Broadsword", "War Axe", "Battle Hammer"],
+    ["Longbow", "Shortbow", "Crossbow", "Throwing Knife", "Blowgun"]
+]
+
 def generate_items(n_items, level):
     bag = {
         ItemType.potion:[],   # potions
@@ -195,12 +203,12 @@ def generate_items(n_items, level):
             side_effect = int(-effect_bonus * (random.random()*0.2) - 1)
             item_effects = {PlayerStat.defense: effect_bonus, PlayerStat.stamina: side_effect}
 
-        bag[g_vars.ItemType(ind)].append(item.Item(item_name, item_uses, item_effects))
+        bag[g_vars.ItemType(ind)].append(item.Item(random.choice(item_names[item_name.value]), item_name, item_uses, item_effects))
     return bag
 
 
-Fist = Item(ItemType.melee, -99, {PlayerStat.attack:0})
-Pass = Item(ItemType.none, -99, {})
+Fist = Item('Fist of Death',ItemType.melee, -99, {PlayerStat.attack:0})
+Pass = Item('Pass', ItemType.none, -99, {})
 # Example usage:
 # health_potion = GameItem("Health Potion", 3, {'health': 20})
 # result = health_potion.use()

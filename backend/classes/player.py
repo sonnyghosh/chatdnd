@@ -373,6 +373,15 @@ class Player:
         character_ref.document(result.character_id).set(result.asdict())
         return result, 200
 
+    def purchaseItem(self, item_idx):
+        cur_item = item.get(item_idx)
+        if cur_item.priceGems < self.num_gems and cur_item.priceCrystals < self.num_crystals and cur_item.priceDiamonds < self.num_diamonds and self.inventory.storeItem(item_idx):
+            self.num_gems -= cur_item.priceGems
+            self.num_crystals -= cur_item.priceCrystals
+            self.num_diamonds -= cur_item.priceDiamonds
+            return True
+        return False
+
 
 def generate_player(name, level=None):
     attr = {

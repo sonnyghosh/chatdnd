@@ -152,7 +152,7 @@ class Battle:
                         target_idx = prompt_user(prompt=prompt, invalid=lambda x: x not in range(len(cur_party)), fn=lambda x: int(x))
                     else:
                         target_idx = 0
-                    target = cur_party[target]
+                    target = cur_party[target_idx]
             else:
                 targets = op_toggle.get_party_members_names()
                 prompt = f'{targets}\nWho would you like to use {thing.type.name} on? Enter the number of the character: '

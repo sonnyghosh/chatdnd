@@ -57,7 +57,7 @@ choices = {
 
 config = {
     "meta": {
-        'verbose': False
+        'verbose': True
     },
     "item": {
         "names": ["potion", "magic", "weapon", "armor"]
